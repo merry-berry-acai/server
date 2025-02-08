@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "drop": "node src/utils/dropping.js",
+    "seed": "node src/utils/seeding.js"
   },
   "keywords": [],
   "author": "",

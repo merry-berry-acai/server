@@ -3,6 +3,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-v14%2B-green)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4.4%2B-blue)
 ![Git](https://img.shields.io/badge/Git-v2.30%2B-lightgrey)
+![Express](https://img.shields.io/badge/Express-v4%2B-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 This repository contains the backend implementation for the **Merry Berry Smoothie & Açaí Shop**. It provides API endpoints to manage users, menu items, promo codes, and orders. The shopping cart is managed on the frontend and is not stored in the database.

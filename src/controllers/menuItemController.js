@@ -1,17 +1,12 @@
-const { MenuItem } = require("../models/MenuItem");
+const { Item } = require("../models/MenuItem");
 
-async function createMenuItem(
-  name,
-  description,
-  price,
-  category,
-  imageUrl = ""
-) {
+
+async function createMenuItem(name, description, basePrice, category, imageUrl = "") {
   try {
-    const newMenuItem = new MenuItem({
+    const newMenuItem = new Item({
       name,
       description,
-      price,
+      basePrice,
       category,
       imageUrl,
     });
@@ -26,7 +21,7 @@ async function createMenuItem(
 
 async function getMenuItemById(menuItemId) {
   try {
-    const menuItem = await MenuItem.findById(menuItemId);
+    const menuItem = await Item.findById(menuItemId);
     if (!menuItem) throw new Error("Menu item not found");
     return menuItem;
   } catch (error) {
@@ -37,7 +32,7 @@ async function getMenuItemById(menuItemId) {
 
 async function getAllMenuItems() {
   try {
-    return await MenuItem.find();
+    return await Item.find();
   } catch (error) {
     console.error("Error fetching menu items:", error);
     throw new Error("Failed to fetch menu items");
@@ -46,13 +41,8 @@ async function getAllMenuItems() {
 
 async function updateMenuItem(menuItemId, updateData) {
   try {
-    const updatedMenuItem = await MenuItem.findByIdAndUpdate(
-      menuItemId,
-      updateData,
-      { new: true }
-    );
-    if (!updatedMenuItem)
-      throw new Error("Menu item not found or update failed");
+    const updatedMenuItem = await Item.findByIdAndUpdate(menuItemId, updateData, { new: true });
+    if (!updatedMenuItem) throw new Error("Menu item not found or update failed");
     return updatedMenuItem;
   } catch (error) {
     console.error("Error updating menu item:", error);
@@ -62,9 +52,8 @@ async function updateMenuItem(menuItemId, updateData) {
 
 async function deleteMenuItem(menuItemId) {
   try {
-    const deletedMenuItem = await MenuItem.findByIdAndDelete(menuItemId);
-    if (!deletedMenuItem)
-      throw new Error("Menu item not found or already deleted");
+    const deletedMenuItem = await Item.findByIdAndDelete(menuItemId);
+    if (!deletedMenuItem) throw new Error("Menu item not found or already deleted");
     return deletedMenuItem;
   } catch (error) {
     console.error("Error deleting menu item:", error);
