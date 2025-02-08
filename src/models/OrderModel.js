@@ -1,20 +1,35 @@
 const mongoose = require('mongoose');
 
-const orderSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    orderDate: { type: Date, default: Date.now },
-    orderStatus: { type: mongoose.Schema.Types.ObjectId, ref: 'OrderStatus' },
-    items: [{
-        itemId: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem' },
-        quantity: { type: Number, required: true },
-        toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topping' }],
-    }],
-    totalAmount: { type: Number, required: true },
-    specialInstructions: { type: String },
-}, {
-    timestamps: true
-});
+const ORDER_STATUSES = [
+    "Pending",
+    "Processing",
+    "Shipped",
+    "Delivered",
+    "Cancelled",
+    "Returned",
+  ];
 
-const Order = mongoose.model('Order', orderSchema);
-
-module.exports = { Order };
+  const orderSchema = new mongoose.Schema(
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+      items: [
+        {
+          product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+          quantity: { type: Number, required: true },
+        },
+      ],
+      totalPrice: { type: Number, required: true },
+      orderStatus: { 
+        type: [String], 
+        enum: ORDER_STATUSES, // Ensure only valid statuses are stored
+        default: ["Pending"], // Default status when order is created
+      },
+      createdAt: { type: Date, default: Date.now },
+      updatedAt: { type: Date, default: Date.now },
+    },
+    { timestamps: true }
+  );
+  
+  const Order = mongoose.model("Order", orderSchema);
+  
+  module.exports = { Order };
