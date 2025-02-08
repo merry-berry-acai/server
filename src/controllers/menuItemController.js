@@ -1,4 +1,4 @@
-const { Item } = require("../models/MenuItem");
+const { Item } = require("../models/MenuItemModel");
 
 
 async function createMenuItem(name, description, basePrice, category, imageUrl = "") {

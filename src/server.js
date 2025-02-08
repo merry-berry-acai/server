@@ -1,18 +1,13 @@
 const express = require("express");
-const app = express();
 const ItemRoutes = require("./routes/ItemRoutes");
+const PromoCodeRoutes = require("./routes/PromoCodeRoutes");
 
-//middlewares
+const app = express();
+
 app.use(express.json());
-app.use("/items",ItemRoutes);
+app.use("/items", ItemRoutes);
+app.use("/promo", PromoCodeRoutes);
 
-//app.verb(path, callback)
-app.get("/", (req, res)=> {
-    //res.send("<h1>ciao</h1>");
-    res.json({
-        message:"Hello World"
-    })
-});
 
 module.exports = {
     app

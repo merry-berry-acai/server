@@ -1,4 +1,4 @@
-const { PromoCode } = require("../models/PromoCode");
+const { PromoCode } = require("../models/PromoCodeModel");
 
 async function createPromoCode(code, discount, startDate, endDate, minOrderAmount = 0, applicableProducts = []) {
     try {

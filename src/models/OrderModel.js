@@ -5,7 +5,7 @@ const orderSchema = new mongoose.Schema({
     orderDate: { type: Date, default: Date.now },
     orderStatus: { type: mongoose.Schema.Types.ObjectId, ref: 'OrderStatus' },
     items: [{
-        itemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Item' },
+        itemId: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem' },
         quantity: { type: Number, required: true },
         toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topping' }],
     }],
