@@ -24,8 +24,6 @@ const orderSchema = new mongoose.Schema(
             enum: ORDER_STATUSES, // Ensure only valid statuses are stored
             default: "Pending", // Default status when order is created
         },
-        createdAt: { type: Date, default: Date.now },
-        updatedAt: { type: Date, default: Date.now },
     },
     { timestamps: true }
 );

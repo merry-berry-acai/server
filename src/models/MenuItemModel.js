@@ -1,22 +1,21 @@
 const mongoose = require('mongoose');
 
-//Array of string containing the categories
-ITEM_CATEGORIES = ['smoothie', 'akai', 'juice'];
+// Array of strings containing valid categories
+const ITEM_CATEGORIES = ['smoothie', 'akai', 'juice'];
 
 const itemSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String },
-    imageURL: { type: String },
+    imageUrl: { type: String, default: "" }, 
     basePrice: { type: Number, required: true },
     category: {
-        type: [String],  // Array of strings
-        enum: ITEM_CATEGORIES,
+        type: String,  
+        enum: ITEM_CATEGORIES, // Ensures only valid categories are used
         required: true,
     },
     availability: { type: Boolean, default: true },
-    imageUrl: { type: String, default: "" },
 }, {
-    timestamps: true        //Created at and updated at
+    timestamps: true // Enables createdAt and updatedAt fields
 });
 
 const Item = mongoose.model('MenuItem', itemSchema);

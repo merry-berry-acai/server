@@ -54,6 +54,8 @@ async function getAllPromoCodes() {
 
 async function updatePromoCode(promoCodeId, updateData) {
     try {
+        if (updateData.discountType) delete updateData.discountType; // Remove discountType field
+        
         const updatedPromoCode = await PromoCode.findByIdAndUpdate(
             promoCodeId,
             updateData,
