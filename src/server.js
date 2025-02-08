@@ -1,7 +1,10 @@
 const express = require("express");
-
-//instance of the express for configuration
 const app = express();
+const ItemRoutes = require("./routes/ItemRoutes");
+
+//middlewares
+app.use(express.json());
+app.use("/items",ItemRoutes);
 
 //app.verb(path, callback)
 app.get("/", (req, res)=> {
