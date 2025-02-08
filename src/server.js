@@ -1,15 +1,13 @@
 const express = require("express");
+const ItemRoutes = require("./routes/ItemRoutes");
+const PromoCodeRoutes = require("./routes/PromoCodeRoutes");
 
-//instance of the express for configuration
 const app = express();
 
-//app.verb(path, callback)
-app.get("/", (req, res)=> {
-    //res.send("<h1>ciao</h1>");
-    res.json({
-        message:"Hello World"
-    })
-});
+app.use(express.json());
+app.use("/items", ItemRoutes);
+app.use("/promo", PromoCodeRoutes);
+
 
 module.exports = {
     app
