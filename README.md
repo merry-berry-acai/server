@@ -15,6 +15,8 @@ This repository contains the backend implementation for the **Merry Berry Smooth
   - [Order Model](#order-model)
   - [MenuItem Model](#menuitem-model)
   - [PromoCode Model](#promocode-model)
+  - [Review Model](#review-model)
+  - [Topping Model](#topping-model)
 - [Shopping Cart Management](#shopping-cart-management)
 - [API Endpoints](#api-endpoints)
   - [Users](#users)
@@ -22,7 +24,7 @@ This repository contains the backend implementation for the **Merry Berry Smooth
   - [Menu Items](#menu-items)
   - [Promo Codes](#promo-codes)
 - [Contributing](#contributing)
-- [License](#license)
+
 
 ## Overview
 This repository powers the backend for the **Merry Berry Smoothie & Açaí Shop**. The API provides endpoints to handle:
@@ -30,6 +32,8 @@ This repository powers the backend for the **Merry Berry Smoothie & Açaí Shop*
 - Menu items and their details
 - Orders and their statuses
 - Promo codes for discounts
+- Reviews and ratings for menu items
+- Toppings for customization
 
 The frontend manages the shopping cart, and it sends the cart details to the backend when an order is placed.
 
@@ -38,47 +42,62 @@ The frontend manages the shopping cart, and it sends the cart details to the bac
 ### User Model
 Stores user information.
 
-#### Fields:
-- `username`: String (required, unique)
+- `name`: String (required)
 - `email`: String (required, unique)
-- `passwordHash`: String (hashed password)
-- `isAdmin`: Boolean (indicates admin privileges)
+- `password`: String (hashed password, required)
+- `orderHistory`: Array of references to `Order`
+- `userRole`: Enum (`customer`, `shop owner`)
 
 ### Order Model
 Stores order details when a user places an order.
 
-#### Fields:
-- `userId`: Reference to User
+- `user`: Reference to `User`
 - `items`: Array of subdocuments containing:
-  - `menuItemId`: Reference to MenuItem
-  - `size`: String ("Small", "Medium", "Large")
-  - `toppings`: Array of Strings (predefined options)
-  - `addIns`: Array of Strings (predefined options)
+  - `product`: Reference to `MenuItem`
   - `quantity`: Number (default: 1)
 - `totalPrice`: Number (calculated based on item prices and quantity)
-- `status`: String (e.g., "Pending", "Completed")
+- `orderStatus`: Array of Strings (e.g., `["Pending", "Processing", "Shipped", "Delivered"]`)
 - `createdAt`: Timestamp
+- `updatedAt`: Timestamp
 
 ### MenuItem Model
 Stores available menu items.
 
-#### Fields:
 - `name`: String (required, unique)
 - `description`: String
-- `price`: Number (required)
-- `sizeOptions`: Array of Strings (available sizes)
-- `toppingsOptions`: Array of Strings (available toppings)
-- `addInsOptions`: Array of Strings (available add-ins)
+- `imageUrl`: String
+- `basePrice`: Number (required)
+- `category`: Enum (`smoothie`, `akai`, `juice`)
+- `availability`: Boolean (default: true)
 
 ### PromoCode Model
 Stores discount codes for orders.
 
-#### Fields:
 - `code`: String (unique, required)
-- `discountPercentage`: Number (0-100)
-- `expirationDate`: Date
+- `discount`: Number (required)
+- `discountType`: Enum (`percentage`, `fixed`)
+- `startDate`: Date (required)
+- `endDate`: Date (required)
+- `minOrderAmount`: Number (default: 0)
+- `applicableProducts`: Array of references to `MenuItem`
+
+### Review Model
+Stores user reviews and ratings for menu items.
+
+- `userId`: Reference to `User`
+- `itemId`: Reference to `MenuItem`
+- `rating`: Number (min: 1, max: 5)
+- `comment`: String
+- `createdAt`: Timestamp
+
+### Topping Model
+Stores available toppings for customization.
+
+- `name`: String (required)
+- `price`: Number (default: 0)
+- `availability`: Boolean (default: true)
 
 ## Shopping Cart Management
-The shopping cart is managed on the frontend and is not stored in the database. When a user places an order, the frontend sends the cart details to the backend, which then stores them in the Order model.
+The shopping cart is managed on the frontend and is not stored in the database. When a user places an order, the frontend sends the cart details to the backend, which then stores them in the `Order` model.
 
 ## API Endpoints
