@@ -11,4 +11,4 @@ const toppingSchema = new mongoose.Schema({
 
 const Topping = mongoose.model('Topping', toppingSchema);
 
-module.exports = Topping;
+module.exports = { Topping };

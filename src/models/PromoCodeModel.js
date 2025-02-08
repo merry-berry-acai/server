@@ -13,4 +13,4 @@ const promoCodeSchema = new mongoose.Schema({
 
 const PromoCode = mongoose.model('PromoCode', promoCodeSchema);
 
-module.exports = PromoCode;
+module.exports = { PromoCode };

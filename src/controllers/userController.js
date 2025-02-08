@@ -1,13 +1,17 @@
-const { User } = require("../models/UserModel");
+const { User } = require("../models/User");
+const bcrypt = require("bcrypt");
 
-async function createUser(username, email, passwordHash, isAdmin = false) {
+async function createUser(name, email, password, userRole) {
   try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = new User({
-      username,
+      name,
       email,
-      passwordHash, // Ensure this is a hashed password, not plaintext
-      isAdmin,
+      password: hashedPassword,
+      userRole,
     });
+
     await newUser.save();
     return newUser;
   } catch (error) {
@@ -18,18 +22,7 @@ async function createUser(username, email, passwordHash, isAdmin = false) {
 
 async function getUserById(userId) {
   try {
-    const user = await User.findById(userId);
-    if (!user) throw new Error("User not found");
-    return user;
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    throw new Error("Failed to fetch user");
-  }
-}
-
-async function getUserByQuery(query) {
-  try {
-    const user = await User.findOne(query);
+    const user = await User.findById(userId).populate("orderHistory");
     if (!user) throw new Error("User not found");
     return user;
   } catch (error) {
@@ -40,7 +33,7 @@ async function getUserByQuery(query) {
 
 async function getAllUsers() {
   try {
-    return await User.find();
+    return await User.find().populate("orderHistory");
   } catch (error) {
     console.error("Error fetching users:", error);
     throw new Error("Failed to fetch users");
@@ -49,9 +42,14 @@ async function getAllUsers() {
 
 async function updateUser(userId, updateData) {
   try {
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
-    });
+    }).populate("orderHistory");
+
     if (!updatedUser) throw new Error("User not found or update failed");
     return updatedUser;
   } catch (error) {
@@ -71,11 +69,26 @@ async function deleteUser(userId) {
   }
 }
 
+async function authenticateUser(email, password) {
+  try {
+    const user = await User.findOne({ email });
+    if (!user) throw new Error("Invalid email or password");
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new Error("Invalid email or password");
+
+    return user;
+  } catch (error) {
+    console.error("Authentication error:", error);
+    throw new Error("Failed to authenticate user");
+  }
+}
+
 module.exports = {
   createUser,
   getUserById,
-  getUserByQuery,
   getAllUsers,
   updateUser,
   deleteUser,
+  authenticateUser,
 };
