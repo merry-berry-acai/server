@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 // function to connect to the database
 async function dbConnect() {
-    let databaseUrl = process.env.MONGODB_URI || `mongodb+srv://dbuser:dbuser@merry-berry.o0ylg.mongodb.net/?retryWrites=true&w=majority&appName=merry-berry`;
+    let databaseUrl = process.env.MONGODB_URI || `mongodb://localhost:27017/merry-berry`;
     try {
         console.log(databaseUrl);
         await mongoose.connect(databaseUrl);
