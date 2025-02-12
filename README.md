@@ -101,3 +101,84 @@ Stores available toppings for customization.
 The shopping cart is managed on the frontend and is not stored in the database. When a user places an order, the frontend sends the cart details to the backend, which then stores them in the `Order` model.
 
 ## API Endpoints
+
+
+## MongoDB Connection Setup
+
+To connect the backend application to a MongoDB database, follow these steps:
+
+**1. MongoDB Installation or Cloud Service:**
+
+*   **Option A: Local MongoDB Installation (for development):**
+    *   If you don't have MongoDB installed locally, you'll need to download and install it.  Follow the official MongoDB installation guide for your operating system: [https://docs.mongodb.com/manual/installation/](https://docs.mongodb.com/manual/installation/)
+    *   After installation, ensure the MongoDB server ( `mongod` process) is running. You can typically start it by running `mongod` in your terminal.
+
+*   **Option B: Cloud MongoDB Service (e.g., MongoDB Atlas):**
+    *   For production or a more managed setup, consider using a cloud MongoDB service like MongoDB Atlas ([https://www.mongodb.com/atlas](https://www.mongodb.com/atlas)).
+    *   Sign up for a free MongoDB Atlas account and create a new cluster.
+    *   Once your cluster is created, you'll get a **connection string**. You will need this connection string in the next step.
+
+**2. Configure Environment Variables:**
+
+The backend application uses environment variables to securely store the MongoDB connection details. You need to create a `.env` file in your backend root directory (if you don't have one already) and define the following environment variable:
+
+```
+MONGODB_URI=your_mongodb_connection_string_here
+```
+
+*   **`MONGODB_URI`**:  This variable holds the connection string to your MongoDB database.
+
+    *   **For Local MongoDB:** If you are using a local MongoDB instance with default settings, the connection string might look like this: `mongodb://localhost:27017/merryberry_db` (where `merryberry_db` is the name of your database - you can choose a different name).
+    *   **For MongoDB Atlas (or other cloud services):**  Replace `your_mongodb_connection_string_here` with the actual connection string provided by your cloud MongoDB service (e.g., from MongoDB Atlas).  **Ensure you replace placeholders like `<username>`, `<password>`, and `<cluster-url>` in the connection string with your actual credentials.**
+
+**Example `.env` file:**
+
+```
+MONGODB_URI=mongodb://localhost:27017/merryberry_db
+# Or for MongoDB Atlas (replace with your actual connection string):
+# MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/merryberry_db?retryWrites=true&w=majority
+```
+
+**Important Security Note:**
+
+*   **Never commit your `.env` file (especially with cloud database credentials) to your Git repository.**  Ensure `.env` is listed in your `.gitignore` file to prevent accidental exposure of sensitive information.
+*   For production deployments, use secure environment variable management practices provided by your hosting platform instead of relying on `.env` files directly within the deployed application.
+
+**3. Backend Application Code (using Mongoose):**
+
+In your backend code (likely in your main server file, e.g., `server.js` or `app.js`), you will use Mongoose to connect to MongoDB using the `MONGODB_URI` environment variable.  Here's a typical example in Node.js with Mongoose:
+
+```javascript
+const mongoose = require('mongoose');
+require('dotenv').config(); // Load environment variables from .env file
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('MongoDB connected successfully!');
+  } catch (error) {
+    console.error('MongoDB connection failed:', error);
+    process.exit(1); // Exit process with failure
+  }
+};
+
+connectDB();
+
+// ... rest of your backend application code ...
+```
+
+**Explanation:**
+
+*   **`require('dotenv').config();`**:  This line (using the `dotenv` package) loads environment variables from your `.env` file into `process.env`.
+*   **`process.env.MONGODB_URI`**:  Accesses the MongoDB connection string from the environment variables.
+*   **`mongoose.connect(...)`**:  Establishes a connection to MongoDB using the provided URI and connection options.
+*   **Error Handling:**  The `try...catch` block handles potential connection errors and logs a message to the console.
+
+**4. Verify Connection:**
+
+After setting up the environment variable and running your backend application, check the console output. You should see the `console.log('MongoDB connected successfully!')` message if the connection is established correctly.  If there are errors, review your connection string, MongoDB server status, and network connectivity.
+
+By following these steps, you will successfully configure your backend application to connect to a MongoDB database, enabling data persistence for your Merry Berry Smoothie & Açaí Shop application.
