@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { checkDuplicateUser } = require("../middlewares/checkDuplicateUser");
 const {
   createUser,
   getUserById,
@@ -9,16 +10,18 @@ const {
   authenticateUser,
 } = require("../controllers/userController");
 
+
 /**
  * Create a new user
  */
-router.post("/new", async (req, res) => {
+// Middleware `checkDuplicateUser` runs before `createUser`
+router.post("/new", checkDuplicateUser, async (req, res) => {
   try {
-    const { name, email, password, userRole } = req.body;
-    const newUser = await createUser(name, email, password, userRole);
-    res.status(201).json({ message: "User created successfully", data: newUser });
+      const { name, email, password, userRole } = req.body;
+      const newUser = await createUser(name, email, password, userRole);
+      res.status(201).json({ message: "User created successfully", data: newUser });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message });
   }
 });
 
