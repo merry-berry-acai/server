@@ -1,13 +1,15 @@
-const { Order } = require("../models/Order");
+const { Order } = require("../models/OrderModel");
 
-async function createOrder(userId, items, totalAmount, specialInstructions = "", orderStatus = null) {
+/**
+ * Create a new order
+ */
+async function createOrder(userId, items, totalAmount, specialInstructions = "") {
     try {
         const newOrder = new Order({
-            userId,
+            user: userId,
             items,
-            totalAmount,
+            totalPrice: totalAmount, 
             specialInstructions,
-            orderStatus,
         });
 
         await newOrder.save();
@@ -18,9 +20,16 @@ async function createOrder(userId, items, totalAmount, specialInstructions = "",
     }
 }
 
+/**
+ * Get order by ID
+ */
 async function getOrderById(orderId) {
     try {
-        const order = await Order.findById(orderId).populate("userId").populate("items.itemId").populate("items.toppings").populate("orderStatus");
+        const order = await Order.findById(orderId)
+            .populate("user") 
+            .populate("items.product")
+            .populate("items.toppings"); // Assuming `toppings` exist
+
         if (!order) throw new Error("Order not found");
         return order;
     } catch (error) {
@@ -29,18 +38,31 @@ async function getOrderById(orderId) {
     }
 }
 
+/**
+ * Get all orders
+ */
 async function getAllOrders() {
     try {
-        return await Order.find().populate("userId").populate("items.itemId").populate("items.toppings").populate("orderStatus");
+        return await Order.find()
+            .populate("user") 
+            .populate("items.product") 
+            .populate("items.toppings"); // Assuming toppings exist
     } catch (error) {
         console.error("Error fetching orders:", error);
         throw new Error("Failed to fetch orders");
     }
 }
 
+/**
+ * Update an order
+ */
 async function updateOrder(orderId, updateData) {
     try {
-        const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, { new: true }).populate("userId").populate("items.itemId").populate("items.toppings").populate("orderStatus");
+        const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, { new: true })
+            .populate("user") 
+            .populate("items.product") 
+            .populate("items.toppings");
+
         if (!updatedOrder) throw new Error("Order not found or update failed");
         return updatedOrder;
     } catch (error) {
@@ -49,6 +71,9 @@ async function updateOrder(orderId, updateData) {
     }
 }
 
+/**
+ * Delete an order
+ */
 async function deleteOrder(orderId) {
     try {
         const deletedOrder = await Order.findByIdAndDelete(orderId);

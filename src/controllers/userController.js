@@ -1,4 +1,4 @@
-const { User } = require("../models/User");
+const { User } = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 
 async function createUser(name, email, password, userRole) {

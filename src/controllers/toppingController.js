@@ -1,4 +1,4 @@
-const { Topping } = require("../models/Topping");
+const { Topping } = require("../models/ToppingModel");
 
 async function createTopping(name, price = 0, availability = true, category) {
     try {
