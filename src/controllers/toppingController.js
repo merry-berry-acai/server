@@ -1,12 +1,11 @@
 const { Topping } = require("../models/ToppingModel");
 
-async function createTopping(name, price = 0, availability = true, category) {
+async function createTopping(name, price = 0, availability = true) {
     try {
         const newTopping = new Topping({
             name,
             price,
-            availability,
-            category,
+            availability
         });
 
         await newTopping.save();
