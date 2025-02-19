@@ -15,11 +15,12 @@ const orderSchema = new mongoose.Schema(
         items: [
             {
                 product: { type: mongoose.Schema.Types.ObjectId, ref: "MenuItem", required: true },
-                quantity: { type: Number, required: true },
+                quantity: { type: Number, required: true, min: 1 },
                 toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Topping" }],
             },
         ],
         totalPrice: { type: Number, required: true },
+        specialInstructions: { type: String, default: "" },
         orderStatus: {
             type: String,
             enum: ORDER_STATUSES, // Ensure only valid statuses are stored

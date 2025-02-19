@@ -15,7 +15,7 @@ const {
  * Create a new user
  */
 // Middleware `checkDuplicateUser` runs before `createUser`
-router.post("/new", checkDuplicateUser, async (req, res) => {
+router.post("/register", checkDuplicateUser, async (req, res) => {
   try {
       const { name, email, password, userRole } = req.body;
       const newUser = await createUser(name, email, password, userRole);
