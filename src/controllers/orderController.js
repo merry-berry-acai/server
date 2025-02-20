@@ -1,42 +1,121 @@
 const { Order } = require("../models/OrderModel");
-const { MenuItem } = require("../models/MenuItemModel");
+const { Item } = require("../models/MenuItemModel");
 const { Topping } = require("../models/ToppingModel");
+const mongoose = require("mongoose");
 
 /**
  * Create a new order
  */
-async function createOrder(userId, items, toppings = [], specialInstructions = "") {
+async function createOrder(userId, items, specialInstructions = "") {
     try {
-        if (!userId || !items || !Array.isArray(items) || items.length === 0) {
-            throw new Error("Invalid request: user and items are required.");
+        let totalPrice = 0;
+        let orderToppingTotal = 0; // Stores total toppings price for the whole order
+        let orderProductsTotal = 0;
+
+        try {
+
+
+            // Extract all topping IDs from items
+            const toppingIds = items.flatMap(item => item.toppings).filter(id => id);
+
+
+
+            let toppingDetails = [];
+            if (toppingIds.length > 0) {
+                // Fetch toppings from the database
+                toppingDetails = await Topping.find({ _id: { $in: toppingIds } }, "_id name price");
+            }
+
+            // Iterate through items and retrieve each topping price
+            items.forEach(item => {
+                if (!Array.isArray(item.toppings)) {
+                    item.toppings = []; // Ensure toppings is always an array
+                }
+
+                item.toppings = item.toppings.map(toppingId => {
+                    const topping = toppingDetails.find(t => t._id.equals(toppingId));
+                    if (topping) {
+                        console.log(`Topping ID: ${topping._id}, Name: ${topping.name}, Price: ${topping.price}`);
+                        orderToppingTotal += topping.price; // Add to total toppings price
+                        return { _id: topping._id, name: topping.name, price: topping.price };
+                    }
+                    return null;
+                }).filter(t => t !== null);
+            });
+
+            console.log("Total Toppings Price for this order:", orderToppingTotal);
+        } catch (error) {
+            console.error("❌ Error retrieving topping prices:", error);
+            throw new Error("Internal server error");
         }
 
-        let totalPrice = 0;
-        
-        // for (const item of items) {
-        //     const menuItem = await MenuItem.findById(item.product._id);
-        //     if (!menuItem) {
-        //         throw new Error(`Menu item with ID ${item.product} not found.`);
-        //     }
 
-        //     totalPrice += menuItem.price * item.quantity;
-        // }
 
-        // if (toppings.length > 0) {
-        //     for (const toppingId of toppings) {
-        //         const topping = await Topping.findById(toppingId);
-        //         if (!topping) {
-        //             throw new Error(`Topping with ID ${toppingId} not found.`);
-        //         }
-        //         totalPrice += topping.price;
-        //     }
-        //}
+
+
+
+        //RETRIEVING PRODUCTS IDS
+        try {
+
+            let productDetails = [];
+            const productsIds = items
+                .flatMap(item => item.product)
+                .filter(id => id);
+
+
+            if (productsIds.length > 0) {
+                productDetails = await Item.find({ _id: { $in: productsIds } }, "_id name basePrice");
+            }
+
+
+            // Iterate through items and retrieve each product price
+            await Promise.all(items.map(async (item) => {
+                try {
+                    // Ensure item.product is a valid ObjectId
+                    if (mongoose.Types.ObjectId.isValid(item.product)) {
+                        // Fetch product details asynchronously
+                        const product = await Item.findById(item.product);
+
+                        if (product) {
+                            // Calculate total price for the product
+                            const productTotal = product.basePrice * item.quantity;
+
+                            // Log the price of each product (product's base price and total)
+                            console.log(`Product: ${product.name}, Price: $${product.basePrice}, Quantity: ${item.quantity}, Total: $${productTotal}`);
+
+                            // Accumulate the total price
+                            orderProductsTotal += productTotal;
+                        } else {
+                            console.error(`Product not found for id: ${item.product}`);
+                        }
+                    } else {
+                        console.error(`Invalid product id: ${item.product}`);
+                    }
+                } catch (err) {
+                    console.error(`Error retrieving product with id ${item.product}:`, err);
+                }
+            }));
+
+            // Log the total price of the order
+            console.log(`Total price of all items: $${orderProductsTotal}`);
+
+
+
+        } catch (error) {
+            console.error("❌ Error retrieving products prices:", error);
+            throw new Error("Internal server error");
+        }
+
+        totalPrice = orderProductsTotal + orderToppingTotal;
+        console.log("Total price including item and topping is: $",totalPrice);
+
+
 
         const newOrder = new Order({
             user: userId,
             items,
-            totalPrice,
-            specialInstructions,
+            totalPrice: totalPrice,
+            specialInstructions
         });
 
         await newOrder.save();
@@ -61,7 +140,7 @@ async function getOrderById(orderId) {
         if (!order) throw new Error("Order not found");
         return order;
     } catch (error) {
-        console.error("❌ Error fetching order:", error);
+        console.error("Error fetching order:", error);
         throw new Error("Failed to fetch order");
     }
 }
@@ -76,7 +155,7 @@ async function getAllOrders() {
             .populate("items.product")
             .populate("toppings");
     } catch (error) {
-        console.error("❌ Error fetching orders:", error);
+        console.error("Error fetching orders:", error);
         throw new Error("Failed to fetch orders");
     }
 }
@@ -92,7 +171,7 @@ async function updateOrder(orderId, updateData) {
             const toppingIds = updateData.toppings || [];
 
             // Fetch updated product & topping details
-            const products = productIds.length > 0 ? await MenuItem.find({ _id: { $in: productIds } }) : [];
+            const products = productIds.length > 0 ? await Item.find({ _id: { $in: productIds } }) : [];
             const toppings = toppingIds.length > 0 ? await Topping.find({ _id: { $in: toppingIds } }) : [];
 
             // Validate products
@@ -130,7 +209,7 @@ async function updateOrder(orderId, updateData) {
         if (!updatedOrder) throw new Error("Order not found or update failed");
         return updatedOrder;
     } catch (error) {
-        console.error("❌ Error updating order:", error);
+        console.error("Error updating order:", error);
         throw new Error(error.message || "Failed to update order");
     }
 }
@@ -144,7 +223,7 @@ async function deleteOrder(orderId) {
         if (!deletedOrder) throw new Error("Order not found or already deleted");
         return deletedOrder;
     } catch (error) {
-        console.error("❌ Error deleting order:", error);
+        console.error("Error deleting order:", error);
         throw new Error("Failed to delete order");
     }
 }

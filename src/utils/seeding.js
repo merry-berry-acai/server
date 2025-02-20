@@ -42,89 +42,89 @@ const promoCodes = [
 async function seedDatabase() {
     try {
         await dbConnect();
-        console.log("✅ Database Connected...");
+        console.log("Database Connected...");
 
-        console.log("🔹 Seeding Users...");
+        console.log("Seeding Users...");
         const seededUsers = await Promise.all(
             users.map(user => createUser(user.name, user.email, user.password, user.userRole))
         );
-        console.log("✅ Users Seeded Successfully!");
+        console.log("Users Seeded Successfully!");
 
-        console.log("🔹 Seeding Menu Items...");
+        console.log("Seeding Menu Items...");
         const seededItems = await Promise.all(
             menuItems.map(item => createMenuItem(item.name, item.description, item.basePrice, item.category))
         );
-        console.log("✅ Menu Items Seeded Successfully!");
+        console.log("Menu Items Seeded Successfully!");
 
-        console.log("🔹 Seeding Toppings...");
+        console.log("Seeding Toppings...");
         const seededToppings = await Promise.all(
             toppings.map(topping => createTopping(topping.name, topping.price, topping.availability))
         );
-        console.log("✅ Toppings Seeded Successfully!");
+        console.log("Toppings Seeded Successfully!");
 
-        console.log("🔹 Seeding Promo Codes...");
+        console.log("Seeding Promo Codes...");
         await Promise.all(
             promoCodes.map(promo => createPromoCode(promo.code, promo.discount, promo.startDate, promo.endDate, promo.minOrderAmount))
         );
-        console.log("✅ Promo Codes Seeded Successfully!");
+        console.log("Promo Codes Seeded Successfully!");
 
-        console.log("🔹 Seeding Orders...");
+        console.log("Seeding Orders...");
 
         // Assign hardcoded users to specific orders
         const user1 = seededUsers[0]; // Danilo
         const user2 = seededUsers[2]; // Joel
         
-        console.log(`🛒 Creating Order for ${user1.name}`);
+        console.log(`Creating Order for ${user1.name}`);
         const order1 = await createOrder(user1._id, [
             { 
                 product: seededItems[0]._id, 
                 quantity: 2, 
-                toppings: seededToppings
+                toppings: [seededToppings[1]._id]
             },
             { 
                 product: seededItems[1]._id, 
                 quantity: 1, 
-                toppings: seededToppings
+                toppings: [seededToppings[1]._id, seededToppings[2]._id]
             }
         ], "No sugar added");
         
-        console.log(`🛒 Creating Order for ${user2.name}`);
+        console.log(`Creating Order for ${user2.name}`);
+
         const order2 = await createOrder(user2._id, [
             { 
                 product: seededItems[2]._id, 
-                quantity: 1, 
-                toppings: seededToppings
+                quantity: 4, 
             },
             { 
                 product: seededItems[3]._id, 
                 quantity: 2, 
-                toppings: seededToppings
+                toppings: [seededToppings[1]._id, seededToppings[3]._id]
             }
         ], "Less ice, please");
         
-        console.log(`✅ Order Created for ${user1.name}`);
-        console.log(`✅ Order Created for ${user2.name}`);
+        console.log(`Order Created for ${user1.name}`);
+        console.log(`Order Created for ${user2.name}`);
         
-        console.log("🔹 Seeding Reviews...");
-        // Assign different hardcoded users to reviews
-        const reviewer1 = seededUsers[1]; // Ethan
-        const reviewer2 = seededUsers[3]; // Peter
+        console.log("Seeding Reviews...");
 
-        console.log(`✏️ Creating Review from ${reviewer1.name}`);
+        const reviewer1 = seededUsers[1]; 
+        const reviewer2 = seededUsers[3]; 
+
+        console.log(`Creating Review from ${reviewer1.name}`);
         await createReview(reviewer1._id, seededItems[0]._id, 5, "Amazing taste and freshness!");
 
-        console.log(`✏️ Creating Review from ${reviewer2.name}`);
+        console.log(`Creating Review from ${reviewer2.name}`);
         await createReview(reviewer2._id, seededItems[1]._id, 4, "Great flavor but a bit too sweet for me.");
 
-        console.log(`✅ Review Added by ${reviewer1.name}`);
-        console.log(`✅ Review Added by ${reviewer2.name}`);
+        console.log(`Review Added by ${reviewer1.name}`);
+        console.log(`Review Added by ${reviewer2.name}`);
 
-        console.log("✅ Seeding Completed Successfully!");
+        console.log("Seeding Completed Successfully!");
     } catch (error) {
-        console.error("❌ Error seeding database:", error);
+        console.error("Error seeding database:", error);
     } finally {
         await dbDisconnect();
-        console.log("✅ Database Disconnected.");
+        console.log("Database Disconnected.");
     }
 }
 

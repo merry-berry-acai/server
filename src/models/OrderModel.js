@@ -16,7 +16,7 @@ const orderSchema = new mongoose.Schema(
             {
                 product: { type: mongoose.Schema.Types.ObjectId, ref: "MenuItem", required: true },
                 quantity: { type: Number, required: true, min: 1 },
-                toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Topping" }],
+                toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Topping", default: [] }],
             },
         ],
         totalPrice: { type: Number, required: true },
