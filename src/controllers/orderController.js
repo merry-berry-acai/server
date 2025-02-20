@@ -35,7 +35,7 @@ async function createOrder(userId, items, specialInstructions = "") {
                 item.toppings = item.toppings.map(toppingId => {
                     const topping = toppingDetails.find(t => t._id.equals(toppingId));
                     if (topping) {
-                        console.log(`Topping ID: ${topping._id}, Name: ${topping.name}, Price: ${topping.price}`);
+                        console.log(`Topping ID: ${topping._id}, Name: ${topping.name}, Price: $${topping.price}`);
                         orderToppingTotal += topping.price; // Add to total toppings price
                         return { _id: topping._id, name: topping.name, price: topping.price };
                     }
@@ -43,7 +43,7 @@ async function createOrder(userId, items, specialInstructions = "") {
                 }).filter(t => t !== null);
             });
 
-            console.log("Total Toppings Price for this order:", orderToppingTotal);
+            console.log("Total Toppings Price for this order: $",orderToppingTotal);
         } catch (error) {
             console.error("❌ Error retrieving topping prices:", error);
             throw new Error("Internal server error");
@@ -133,9 +133,9 @@ async function createOrder(userId, items, specialInstructions = "") {
 async function getOrderById(orderId) {
     try {
         const order = await Order.findById(orderId)
-            .populate("user")
+            .populate("user", "name email")
             .populate("items.product")
-            .populate("toppings");
+            .populate("items.toppings");
 
         if (!order) throw new Error("Order not found");
         return order;
@@ -151,9 +151,9 @@ async function getOrderById(orderId) {
 async function getAllOrders() {
     try {
         return await Order.find()
-            .populate("user")
-            .populate("items.product")
-            .populate("toppings");
+            .populate("user", "name email")
+            .populate("items.product", "name basePrice")
+            .populate("items.toppings", "name price");
     } catch (error) {
         console.error("Error fetching orders:", error);
         throw new Error("Failed to fetch orders");
