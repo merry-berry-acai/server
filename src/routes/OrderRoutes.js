@@ -64,13 +64,13 @@ router.patch("/:id/status", validateOrderStatus, async (req, res) => {
 /**
  * Delete an order by ID
  */
-router.delete("/:id", async (req, res) => {
-  try {
-    const deletedOrder = await deleteOrder(req.params.id);
-    res.status(200).json({ message: `Order '${deletedOrder._id}' successfully deleted.` });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// router.delete("/:id", async (req, res) => {
+//   try {
+//     const deletedOrder = await deleteOrder(req.params.id);
+//     res.status(200).json({ message: `Order '${deletedOrder._id}' successfully deleted.` });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 module.exports = router;

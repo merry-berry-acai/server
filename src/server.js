@@ -15,6 +15,11 @@ const app = express();
 app.use(express.json());
 app.use(cors()); // Enable CORS for frontend integration
 
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Server is running!" });
+});
+
+
 // Routes
 app.use("/items", ItemRoutes);
 app.use("/promo", PromoCodeRoutes);
