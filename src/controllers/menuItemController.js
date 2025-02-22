@@ -2,7 +2,15 @@ const { Item } = require("../models/MenuItemModel");
 
 
 async function createMenuItem(name, description, basePrice, category, imageUrl = "") {
+    const ITEM_CATEGORIES = ["smoothie", "akai", "juice"];
+
     try {
+
+        if (!ITEM_CATEGORIES.includes(category)) {
+            console.error(`Invalid category: "${category}". Allowed: ${ITEM_CATEGORIES.join(", ")}`);
+            return { error: `Invalid category: "${category}". Must be one of ${ITEM_CATEGORIES.join(", ")}` };
+        }
+
         const newMenuItem = new Item({
             name,
             description,

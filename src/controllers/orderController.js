@@ -46,12 +46,9 @@ async function createOrder(userId, items, specialInstructions = "") {
 
             console.log("Total Toppings Price for this order: $",orderToppingTotal);
         } catch (error) {
-            console.error("❌ Error retrieving topping prices:", error);
+            console.error("Error retrieving topping prices:", error);
             throw new Error("Internal server error");
         }
-
-
-
 
 
 
@@ -103,7 +100,7 @@ async function createOrder(userId, items, specialInstructions = "") {
 
 
         } catch (error) {
-            console.error("❌ Error retrieving products prices:", error);
+            console.error("Error retrieving products prices:", error);
             throw new Error("Internal server error");
         }
 
@@ -172,9 +169,10 @@ async function getAllOrders() {
 /**
  * Update an order STATUS
  */
-const ORDER_STATUSES = ["Pending", "Processing", "Delivered", "Cancelled"];
 
 async function updateOrderStatus(orderId, newStatus) {
+    const ORDER_STATUSES = ["Pending", "Processing", "Delivered", "Cancelled"];
+    
     try {
         orderId = orderId.trim();
 
