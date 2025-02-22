@@ -2,6 +2,7 @@ const { Order } = require("../models/OrderModel");
 const { Item } = require("../models/MenuItemModel");
 const { Topping } = require("../models/ToppingModel");
 const mongoose = require("mongoose");
+const { User } = require("../models/UserModel");
 
 /**
  * Create a new order
@@ -119,6 +120,14 @@ async function createOrder(userId, items, specialInstructions = "") {
         });
 
         await newOrder.save();
+
+        // Add order to `orderHistory` in User model
+        await User.findByIdAndUpdate(
+            userId,
+            { $push: { orderHistory: newOrder._id } }, // Push order ID to history
+            { new: true }
+        );
+
         return newOrder;
     } catch (error) {
         console.error("Error creating order:", error);
