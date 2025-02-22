@@ -1,8 +1,11 @@
 const { Item } = require("../models/MenuItemModel");
 
+const ITEM_CATEGORIES = ["smoothie", "akai", "juice"];
 
 async function createMenuItem(name, description, basePrice, category, imageUrl = "") {
+
     try {
+
         const newMenuItem = new Item({
             name,
             description,

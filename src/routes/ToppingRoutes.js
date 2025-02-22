@@ -13,7 +13,7 @@ const {
  */
 router.post("/new", async (req, res) => {
   try {
-    const { name, price, availability, category } = req.body;
+    const { name, price, availability} = req.body;
     const newTopping = await createTopping(name, price, availability, category);
     res.status(201).json({ message: "Topping created successfully", data: newTopping });
   } catch (error) {

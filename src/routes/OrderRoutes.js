@@ -1,21 +1,22 @@
 const express = require("express");
 const router = express.Router();
+const { validateOrderStatus } = require("../middlewares/validateOrderStatus");
 const {
   createOrder,
   getOrderById,
   getAllOrders,
-  getUserOrders,
   updateOrderStatus,
   deleteOrder,
 } = require("../controllers/orderController");
+
 
 /**
  * Create a new order
  */
 router.post("/new", async (req, res) => {
   try {
-    const { userId, items, totalPrice, specialInstructions = "" } = req.body;
-    const newOrder = await createOrder(userId, items, totalPrice, specialInstructions);
+    const { userId, items, specialInstructions = "" } = req.body;
+    const newOrder = await createOrder(userId, items, specialInstructions);
     res.status(201).json({ message: "Order created successfully", data: newOrder });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -46,22 +47,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-/**
- * Get all orders for a specific user
- */
-router.get("/user/:userId", async (req, res) => {
-  try {
-    const orders = await getUserOrders(req.params.userId);
-    res.status(200).json({ message: "Request successful", data: orders });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 /**
  * Update order status
  */
-router.patch("/:id/status", async (req, res) => {
+router.patch("/:id/status", validateOrderStatus, async (req, res) => {
   try {
     const { orderStatus } = req.body;
     const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);

@@ -9,9 +9,9 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ // Basic regex for email validation
     },
-    password: { type: String, required: true },
+    password: { type: String, required: true, minLength: 6 },
     orderHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
-    userRole: { type: String, enum: ['customer', 'shop owner'], required: true },
+    userRole: { type: String, enum: ['customer', 'shop owner'], default: "customer", required: false },
 }, {
     timestamps: true
 });

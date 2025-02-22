@@ -1,34 +1,144 @@
 const { Order } = require("../models/OrderModel");
+const { Item } = require("../models/MenuItemModel");
+const { Topping } = require("../models/ToppingModel");
+const mongoose = require("mongoose");
+const { User } = require("../models/UserModel");
+
+
+//Calculate the order's total price 
+// summing topping and item prices
+
+async function totalPrice(items) {
+    let totalPrice = 0;
+    let orderToppingTotal = 0; // Stores total toppings price for the whole order
+    let orderProductsTotal = 0;
+
+    try {
+
+        // Extract all topping IDs from items
+        const toppingIds = items.flatMap(item => item.toppings).filter(id => id);
+        let toppingDetails = [];
+
+        if (toppingIds.length > 0) {
+            // Fetch toppings from the database
+            toppingDetails = await Topping.find({ _id: { $in: toppingIds } }, "_id name price");
+        }
+
+        // Iterate through items and retrieve each topping price
+        items.forEach(item => {
+            if (!Array.isArray(item.toppings)) {
+                item.toppings = []; // Ensure toppings is always an array
+            }
+
+            item.toppings = item.toppings.map(toppingId => {
+                const topping = toppingDetails.find(t => t._id.equals(toppingId));
+                if (topping) {
+                    console.log(`Topping ID: ${topping._id}, Name: ${topping.name}, Price: $${topping.price}`);
+                    orderToppingTotal += topping.price; // Add to total toppings price
+                    return { _id: topping._id, name: topping.name, price: topping.price };
+                }
+                return null;
+            }).filter(t => t !== null);
+        });
+
+        console.log("Total Toppings Price for this order: $", orderToppingTotal);
+    } catch (error) {
+        console.error("Error retrieving topping prices:", error);
+        throw new Error("Internal server error");
+    }
+
+    //RETRIEVING PRODUCTS IDS
+    try {
+
+        let productDetails = [];
+        const productsIds = items
+            .flatMap(item => item.product)
+            .filter(id => id);
+
+        if (productsIds.length > 0) {
+            productDetails = await Item.find({ _id: { $in: productsIds } }, "_id name basePrice");
+        }
+
+        // Iterate through items and retrieve each product price
+        await Promise.all(items.map(async (item) => {
+            try {
+                // Ensure item.product is a valid ObjectId
+                if (mongoose.Types.ObjectId.isValid(item.product)) {
+                    // Fetch product details asynchronously
+                    const product = await Item.findById(item.product);
+
+                    if (product) {
+                        // Calculate total price for the product
+                        const productTotal = product.basePrice * item.quantity;
+
+                        // Log the price of each product (product's base price and total)
+                        console.log(`Product: ${product.name}, Price: $${product.basePrice}, Quantity: ${item.quantity}, Total: $${productTotal}`);
+
+                        // Accumulate the total price
+                        orderProductsTotal += productTotal;
+                    } else {
+                        console.error(`Product not found for id: ${item.product}`);
+                    }
+                } else {
+                    console.error(`Invalid product id: ${item.product}`);
+                }
+            } catch (err) {
+                console.error(`Error retrieving product with id ${item.product}:`, err);
+            }
+        }));
+
+        console.log(`Total price of all items: $${orderProductsTotal}`);
+
+    } catch (error) {
+        console.error("Error retrieving products prices:", error);
+        throw new Error("Internal server error");
+    }
+
+    totalPrice = orderProductsTotal + orderToppingTotal;
+    console.log("Total price including item and topping is: $", totalPrice);
+    return totalPrice;
+}
 
 /**
  * Create a new order
  */
-async function createOrder(userId, items, totalAmount, specialInstructions = "") {
+async function createOrder(userId, items, specialInstructions = "") {
     try {
+        total = await totalPrice(items);
+
         const newOrder = new Order({
             user: userId,
             items,
-            totalPrice: totalAmount, 
-            specialInstructions,
+            totalPrice: total,
+            specialInstructions
         });
 
         await newOrder.save();
+
+        // Add order to `orderHistory` in User model
+        await User.findByIdAndUpdate(
+            userId,
+            { $push: { orderHistory: newOrder._id } }, // Push order ID to history
+            { new: true }
+        );
+
         return newOrder;
     } catch (error) {
         console.error("Error creating order:", error);
-        throw new Error("Failed to create order");
+        throw new Error("Internal server error");
     }
 }
 
+
 /**
- * Get order by ID
+ * Get order by ID (with populated fields)
  */
 async function getOrderById(orderId) {
     try {
         const order = await Order.findById(orderId)
-            .populate("user") 
+            .populate("user", "name email")
             .populate("items.product")
-            .populate("items.toppings"); // Assuming `toppings` exist
+            .populate("items.toppings");
 
         if (!order) throw new Error("Order not found");
         return order;
@@ -44,9 +154,9 @@ async function getOrderById(orderId) {
 async function getAllOrders() {
     try {
         return await Order.find()
-            .populate("user") 
-            .populate("items.product") 
-            .populate("items.toppings"); // Assuming toppings exist
+            .populate("user", "name email")
+            .populate("items.product", "name basePrice")
+            .populate("items.toppings", "name price");
     } catch (error) {
         console.error("Error fetching orders:", error);
         throw new Error("Failed to fetch orders");
@@ -54,22 +164,31 @@ async function getAllOrders() {
 }
 
 /**
- * Update an order
+ * Update an order STATUS
  */
-async function updateOrder(orderId, updateData) {
-    try {
-        const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, { new: true })
-            .populate("user") 
-            .populate("items.product") 
-            .populate("items.toppings");
 
-        if (!updatedOrder) throw new Error("Order not found or update failed");
+async function updateOrderStatus(orderId, newStatus) {
+
+    try {
+
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: orderId },
+            { orderStatus: newStatus },
+            { new: true }
+        );
+
+        if (!updatedOrder) {
+            throw new Error("Order not found.");
+        }
+
+        console.log("Order status updated successfully:", updatedOrder);
         return updatedOrder;
     } catch (error) {
-        console.error("Error updating order:", error);
-        throw new Error("Failed to update order");
+        console.error("Error updating order status:", error);
+        throw new Error(error.message || "Internal server error");
     }
 }
+
 
 /**
  * Delete an order
@@ -89,6 +208,6 @@ module.exports = {
     createOrder,
     getOrderById,
     getAllOrders,
-    updateOrder,
+    updateOrderStatus,
     deleteOrder,
 };
