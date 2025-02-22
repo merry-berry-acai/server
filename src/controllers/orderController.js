@@ -161,58 +161,41 @@ async function getAllOrders() {
 }
 
 /**
- * Update an order
+ * Update an order STATUS
  */
-async function updateOrder(orderId, updateData) {
+const ORDER_STATUSES = ["Pending", "Processing", "Delivered", "Cancelled"];
+
+async function updateOrderStatus(orderId, newStatus) {
     try {
-        // Extract new product & topping IDs if items or toppings are being updated
-        if (updateData.items || updateData.toppings) {
-            const productIds = updateData.items ? updateData.items.map(item => item.product) : [];
-            const toppingIds = updateData.toppings || [];
+        orderId = orderId.trim();
 
-            // Fetch updated product & topping details
-            const products = productIds.length > 0 ? await Item.find({ _id: { $in: productIds } }) : [];
-            const toppings = toppingIds.length > 0 ? await Topping.find({ _id: { $in: toppingIds } }) : [];
-
-            // Validate products
-            if (productIds.length > 0 && products.length !== productIds.length) {
-                throw new Error("One or more products not found.");
-            }
-
-            // Validate toppings
-            if (toppingIds.length > 0 && toppings.length !== toppingIds.length) {
-                throw new Error("One or more toppings not found.");
-            }
-
-            // Recalculate total price if items or toppings were updated
-            let totalPrice = 0;
-            if (updateData.items) {
-                totalPrice = updateData.items.reduce((sum, item) => {
-                    const product = products.find(p => p._id.toString() === item.product.toString());
-                    if (!product) throw new Error(`Product with ID ${item.product} not found`);
-                    return sum + product.basePrice * Math.max(1, item.quantity);
-                }, 0);
-            }
-
-            if (updateData.toppings) {
-                totalPrice += toppings.reduce((sum, topping) => sum + topping.price, 0);
-            }
-
-            updateData.totalPrice = totalPrice;
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            throw new Error(`Invalid ObjectId: ${orderId}`);
         }
 
-        const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, { new: true })
-            .populate("user")
-            .populate("items.product")
-            .populate("toppings");
+        if (!ORDER_STATUSES.includes(newStatus)) {
+            throw new Error(`Invalid order status: ${newStatus}. Must be one of: ${ORDER_STATUSES.join(", ")}`);
+        }
 
-        if (!updatedOrder) throw new Error("Order not found or update failed");
+
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: orderId },
+            { orderStatus: newStatus }, 
+            { new: true } 
+        );
+
+        if (!updatedOrder) {
+            throw new Error("Order not found.");
+        }
+
+        console.log("Order status updated successfully:", updatedOrder);
         return updatedOrder;
     } catch (error) {
-        console.error("Error updating order:", error);
-        throw new Error(error.message || "Failed to update order");
+        console.error("Error updating order status:", error);
+        throw new Error(error.message || "Internal server error");
     }
 }
+
 
 /**
  * Delete an order
@@ -232,6 +215,6 @@ module.exports = {
     createOrder,
     getOrderById,
     getAllOrders,
-    updateOrder,
+    updateOrderStatus,
     deleteOrder,
 };
