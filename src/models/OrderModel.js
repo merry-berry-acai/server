@@ -33,6 +33,7 @@ const orderSchema = new mongoose.Schema(
             type: String,
             enum: ORDER_STATUSES, // Ensure only valid statuses are stored
             default: "Pending", // Default status when order is created
+            required: false
         },
     },
     { timestamps: true }

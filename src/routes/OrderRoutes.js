@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { validateOrderStatus } = require("../middlewares/validateOrderStatus");
 const {
   createOrder,
   getOrderById,
@@ -7,6 +8,7 @@ const {
   updateOrderStatus,
   deleteOrder,
 } = require("../controllers/orderController");
+
 
 /**
  * Create a new order
@@ -49,7 +51,7 @@ router.get("/", async (req, res) => {
 /**
  * Update order status
  */
-router.patch("/:id/status", async (req, res) => {
+router.patch("/:id/status", validateOrderStatus, async (req, res) => {
   try {
     const { orderStatus } = req.body;
     const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);

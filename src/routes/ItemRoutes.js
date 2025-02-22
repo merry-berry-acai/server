@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { validateCategory } = require("../middlewares/validateCategory");
 const {
   createMenuItem,
   getMenuItemById,
@@ -10,8 +11,9 @@ const {
 
 
 
+
 // Create a new menu item
-router.post("/new", async (req, res) => {
+router.post("/new", validateCategory, async (req, res) => {
   try {
     const { name, description, basePrice, category, imageUrl } = req.body;
     const newItem = await createMenuItem(name, description, basePrice, category, imageUrl);
@@ -48,7 +50,7 @@ router.get("/", async (req, res) => {
 
 
 // Update a menu item by ID
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", validateCategory, async (req, res) => {
   try {
     const updatedItem = await updateMenuItem(req.params.id, req.body);
     res.status(200).json(updatedItem);
