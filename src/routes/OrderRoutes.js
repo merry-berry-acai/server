@@ -4,7 +4,6 @@ const {
   createOrder,
   getOrderById,
   getAllOrders,
-  getUserOrders,
   updateOrderStatus,
   deleteOrder,
 } = require("../controllers/orderController");
@@ -46,17 +45,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-/**
- * Get all orders for a specific user
- */
-router.get("/user/:userId", async (req, res) => {
-  try {
-    const orders = await getUserOrders(req.params.userId);
-    res.status(200).json({ message: "Request successful", data: orders });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 /**
  * Update order status
