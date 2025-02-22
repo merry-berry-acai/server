@@ -168,7 +168,6 @@ async function getAllOrders() {
  */
 
 async function updateOrderStatus(orderId, newStatus) {
-    const ORDER_STATUSES = ["Pending", "Processing", "Delivered", "Cancelled"];
 
     try {
 

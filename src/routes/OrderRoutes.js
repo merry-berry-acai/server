@@ -15,8 +15,8 @@ const {
  */
 router.post("/new", async (req, res) => {
   try {
-    const { user, items, specialInstructions = "" } = req.body;
-    const newOrder = await createOrder(user, items, specialInstructions);
+    const { userId, items, specialInstructions = "" } = req.body;
+    const newOrder = await createOrder(userId, items, specialInstructions);
     res.status(201).json({ message: "Order created successfully", data: newOrder });
   } catch (error) {
     res.status(500).json({ error: error.message });
