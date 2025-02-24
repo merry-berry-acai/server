@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cors()); // Enable CORS for frontend integration
 
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Server is running!" });
+    res.status(200).json({ message: "Server is running!" });
 });
 
 
@@ -27,6 +27,15 @@ app.use("/orders", OrderRoutes);
 app.use("/reviews", ReviewRoutes);
 app.use("/users", UserRoutes);
 app.use("/toppings", ToppingRoutes);
+
+app.use(cors({
+    origin: "*", // Allow all origins; adjust as needed for production
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+  }));
+
+app.get("/", (req, res) => {
+    res.status(200).json({ message: "Server is running!" });
+});
 
 
 module.exports = { app };
