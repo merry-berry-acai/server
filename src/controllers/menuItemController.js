@@ -2,9 +2,12 @@ const { Item } = require("../models/MenuItemModel");
 
 const ITEM_CATEGORIES = ["smoothie", "akai", "juice"];
 
-async function createMenuItem(name, description, basePrice, category, imageUrl = "") {
+async function createMenuItem(name, description, basePrice, category, imageUrl = "", toppings = []) {
 
     try {
+
+        // Validate toppings (convert to ObjectIds)
+        const toppingIds = toppings.map(toppingId => String(toppingId));
 
         const newMenuItem = new Item({
             name,
@@ -12,6 +15,7 @@ async function createMenuItem(name, description, basePrice, category, imageUrl =
             basePrice,
             category,
             imageUrl,
+            toppings: toppingIds
         });
 
         await newMenuItem.save();

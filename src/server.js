@@ -29,8 +29,4 @@ app.use("/users", UserRoutes);
 app.use("/toppings", ToppingRoutes);
 
 
-app.get("/", (req, res) => {
-  res.status(200).json({ message: "Server is running!" });
-});
-
 module.exports = { app };

@@ -8,6 +8,7 @@ const itemSchema = new mongoose.Schema({
     description: { type: String },
     imageUrl: { type: String, default: "" }, 
     basePrice: { type: Number, required: true },
+    toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topping' }],
     category: {
         type: String,  
         enum: ITEM_CATEGORIES, // Ensures only valid categories are used
@@ -21,3 +22,6 @@ const itemSchema = new mongoose.Schema({
 const Item = mongoose.model('MenuItem', itemSchema);
 
 module.exports = { Item };
+
+
+// adding the toppings: [ references ]
