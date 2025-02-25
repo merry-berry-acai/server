@@ -1,10 +1,16 @@
+const { Category } = require("../models/CategoryModel");
 const { Item } = require("../models/MenuItemModel");
 
-const ITEM_CATEGORIES = ["smoothie", "akai", "juice"];
 
-async function createMenuItem(name, description, basePrice, category, imageUrl = "", toppings = []) {
+async function createMenuItem(name, description, basePrice, categoryName, imageUrl = "", toppings = []) {
 
     try {
+        // Ensure the category exists in the database
+        const category = await Category.findOne({ name: categoryName });
+
+        if (!category) {
+            throw new Error(`Category '${categoryName}' not found`);
+        }
 
         // Validate toppings (convert to ObjectIds)
         const toppingIds = toppings.map(toppingId => String(toppingId));
@@ -13,7 +19,7 @@ async function createMenuItem(name, description, basePrice, category, imageUrl =
             name,
             description,
             basePrice,
-            category,
+            category: category._id,
             imageUrl,
             toppings: toppingIds
         });

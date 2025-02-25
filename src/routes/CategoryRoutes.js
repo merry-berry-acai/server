@@ -1,5 +1,4 @@
 const express = require("express");
-const { validateCategory } = require("../middlewares/validateCategory");
 const {
     createCategory,
     getAllCategories,
@@ -12,7 +11,7 @@ const {
 const router = express.Router();
 
 // Create a category
-router.post("/", validateCategory, async (req, res) => {
+router.post("/", async (req, res) => {
     try {
         const { name } = req.body;
         const category = await createCategory(name);
@@ -43,7 +42,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update category
-router.put("/:id", validateCategory, async (req, res) => {
+router.put("/:id", async (req, res) => {
     try {
         const { name } = req.body;
         const updatedCategory = await updateCategory(req.params.id, name);

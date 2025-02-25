@@ -5,6 +5,7 @@ const { createReview } = require("../controllers/reviewController");
 const { createTopping } = require("../controllers/toppingController");
 const { createUser } = require("../controllers/userController");
 const { createPromoCode } = require("../controllers/promoCodeController");
+const { createCategory } = require("../controllers/categoryController");
 
 // Sample Users
 const users = [
@@ -35,28 +36,28 @@ const menuItems = [
         description: "A nutrient-packed bowl with acai, granola, and fruits",
         basePrice: 8.49,
         category: "akai",
-        toppings: ["67b91705bab7a18aae50ae9a"]
+        toppings: []
     },
     {
         name: "Mango Juice",
         description: "Freshly squeezed mango juice with a hint of lime",
         basePrice: 4.99,
         category: "juice",
-        toppings: ["67b91705bab7a18aae50ae9b", "67b91705bab7a18aae50ae9c"]
+        toppings: []
     },
     {
         name: "Tropical Smoothie",
         description: "A mix of pineapple, coconut, and banana",
         basePrice: 6.99,
         category: "smoothie",
-        toppings: ["67b91705bab7a18aae50ae9a", "67b91705bab7a18aae50ae9b"]
+        toppings: []
     },
     {
         name: "Acai Energy Boost",
         description: "Acai bowl with honey, banana, and nuts",
         basePrice: 7.99,
         category: "akai",
-        toppings: ["67b91705bab7a18aae50ae9c", "67b91705bab7a18aae50ae9d"]
+        toppings: []
     }
 ];
 
@@ -94,17 +95,32 @@ async function seedDatabase() {
         );
         console.log("Categories Seeded Successfully!");
 
-        console.log("Seeding Menu Items...");
-        const seededItems = await Promise.all(
-            menuItems.map(item => createMenuItem(item.name, item.description, item.basePrice, item.category, "", item.toppings))
-        );
-        console.log("Menu Items Seeded Successfully!");
-
         console.log("Seeding Toppings...");
         const seededToppings = await Promise.all(
             toppings.map(topping => createTopping(topping.name, topping.price, topping.availability))
         );
         console.log("Toppings Seeded Successfully!");
+
+
+        console.log("Seeding Menu Items...");
+
+        const randomToppings = seededToppings
+            .sort(() => 0.5 - Math.random()) // Shuffle array
+            .slice(0, Math.floor(Math.random() * seededToppings.length) +1);
+
+        const seededItems = await Promise.all(
+            menuItems.map(item => {
+                return createMenuItem(
+                    item.name,
+                    item.description,
+                    item.basePrice,
+                    item.category,
+                    item.imageUrl || "",
+                    randomToppings.map(t => t._id))
+            })
+
+        );
+        console.log("Menu Items Seeded Successfully!");
 
         console.log("Seeding Promo Codes...");
         await Promise.all(
