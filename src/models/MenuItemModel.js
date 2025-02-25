@@ -14,6 +14,7 @@ const itemSchema = new mongoose.Schema({
         enum: ITEM_CATEGORIES, // Ensures only valid categories are used
         required: true,
     },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
     availability: { type: Boolean, default: true },
 }, {
     timestamps: true // Enables createdAt and updatedAt fields
@@ -22,6 +23,3 @@ const itemSchema = new mongoose.Schema({
 const Item = mongoose.model('MenuItem', itemSchema);
 
 module.exports = { Item };
-
-
-// adding the toppings: [ references ]

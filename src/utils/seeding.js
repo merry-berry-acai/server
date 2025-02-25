@@ -14,6 +14,13 @@ const users = [
     { name: "Peter", email: "peter@example.com", password: "password123", userRole: "shop owner" },
 ];
 
+// Sample Categories
+const categories = [
+    { name: "smoothie" },
+    { name: "akai" },
+    { name: "juice" },
+];
+
 // Sample Menu Items
 const menuItems = [
     {
@@ -21,35 +28,35 @@ const menuItems = [
         description: "A refreshing blend of strawberries and yogurt",
         basePrice: 5.99,
         category: "smoothie",
-        toppings: [] 
+        toppings: []
     },
     {
         name: "Blueberry Acai Bowl",
         description: "A nutrient-packed bowl with acai, granola, and fruits",
         basePrice: 8.49,
         category: "akai",
-        toppings: ["67b91705bab7a18aae50ae9a"] 
+        toppings: ["67b91705bab7a18aae50ae9a"]
     },
     {
         name: "Mango Juice",
         description: "Freshly squeezed mango juice with a hint of lime",
         basePrice: 4.99,
         category: "juice",
-        toppings: ["67b91705bab7a18aae50ae9b", "67b91705bab7a18aae50ae9c"] 
+        toppings: ["67b91705bab7a18aae50ae9b", "67b91705bab7a18aae50ae9c"]
     },
     {
         name: "Tropical Smoothie",
         description: "A mix of pineapple, coconut, and banana",
         basePrice: 6.99,
         category: "smoothie",
-        toppings: ["67b91705bab7a18aae50ae9a", "67b91705bab7a18aae50ae9b"] 
+        toppings: ["67b91705bab7a18aae50ae9a", "67b91705bab7a18aae50ae9b"]
     },
     {
         name: "Acai Energy Boost",
         description: "Acai bowl with honey, banana, and nuts",
         basePrice: 7.99,
         category: "akai",
-        toppings: ["67b91705bab7a18aae50ae9c", "67b91705bab7a18aae50ae9d"] 
+        toppings: ["67b91705bab7a18aae50ae9c", "67b91705bab7a18aae50ae9d"]
     }
 ];
 
@@ -80,6 +87,12 @@ async function seedDatabase() {
             users.map(user => createUser(user.name, user.email, user.password, user.userRole))
         );
         console.log("Users Seeded Successfully!");
+
+        console.log("Seeding Categories...");
+        const seededCategories = await Promise.all(
+            categories.map(category => createCategory(category.name))
+        );
+        console.log("Categories Seeded Successfully!");
 
         console.log("Seeding Menu Items...");
         const seededItems = await Promise.all(
