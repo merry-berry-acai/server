@@ -1,16 +1,27 @@
 const { Category } = require("../models/CategoryModel");
 const { Item } = require("../models/MenuItemModel");
 
+// Category validation
+async function validateCategoryAndGetId(categoryName) {
+    if (!categoryName) return null; // Skip validation if category is not provided
 
-async function createMenuItem(name, description, basePrice, categoryName, imageUrl = "", toppings = []) {
+    const category = await Category.findOne({ name: categoryName });
+
+    if (!category) {
+        console.error(`Category '${categoryName}' not found`);
+        const availableCategories = await Category.find({}, "name").lean();
+        throw new Error(`Category '${categoryName}' not found. Available categories: ${availableCategories.map(cat => cat.name).join(", ")}`);
+    }
+
+    return category._id;
+}
+
+async function createMenuItem(name, description, basePrice, category, imageUrl = "", toppings = []) {
 
     try {
-        // Ensure the category exists in the database
-        const category = await Category.findOne({ name: categoryName });
 
-        if (!category) {
-            throw new Error(`Category '${categoryName}' not found`);
-        }
+        // Validate and return category ID
+        const categoryId = await validateCategoryAndGetId(category);
 
         // Validate toppings (convert to ObjectIds)
         const toppingIds = toppings.map(toppingId => String(toppingId));
@@ -19,7 +30,7 @@ async function createMenuItem(name, description, basePrice, categoryName, imageU
             name,
             description,
             basePrice,
-            category: category._id,
+            category: categoryId,
             imageUrl,
             toppings: toppingIds
         });
@@ -52,16 +63,27 @@ async function getAllMenuItems() {
     }
 }
 
+
 async function updateMenuItem(menuItemId, updateData) {
     try {
+        // Validate and replace category name with ObjectId if necessary
+        if (updateData.category) {
+            updateData.category = await validateCategoryAndGetId(updateData.category);
+        }
+
         const updatedMenuItem = await Item.findByIdAndUpdate(menuItemId, updateData, { new: true });
-        if (!updatedMenuItem) throw new Error("Menu item not found or update failed");
+
+        if (!updatedMenuItem) {
+            return { error: "Menu item not found or update failed" };
+        }
+
         return updatedMenuItem;
     } catch (error) {
-        console.error("Error updating menu item:", error);
-        throw new Error("Failed to update menu item");
+        console.error("❌ Error updating menu item:", error.message);
+        return { error: error.message };
     }
 }
+
 
 async function deleteMenuItem(menuItemId) {
     try {
