@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     },
     password: { type: String, required: true, minLength: 6 },
     orderHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
-    userRole: { type: String, enum: ['customer', 'shop owner'], default: "customer", required: false },
+    admin: { type: Boolean, default: false}
 }, {
     timestamps: true
 });

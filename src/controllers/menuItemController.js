@@ -3,25 +3,50 @@ const { Item } = require("../models/MenuItemModel");
 
 // Category validation
 async function validateCategoryAndGetId(categoryName) {
-    if (!categoryName) return null; // Skip validation if category is not provided
+    try {
+        if (!categoryName) {
+            return { error: "Category name is required." };
+        }
 
-    const category = await Category.findOne({ name: categoryName });
+        const category = await Category.findOne({ name: categoryName });
 
-    if (!category) {
-        console.error(`Category '${categoryName}' not found`);
-        const availableCategories = await Category.find({}, "name").lean();
-        throw new Error(`Category '${categoryName}' not found. Available categories: ${availableCategories.map(cat => cat.name).join(", ")}`);
+        if (!category) {
+            console.error(`Category '${categoryName}' not found`);
+
+            // Retrieve all available categories
+            const availableCategories = await Category.find({}, "name").lean();
+            const categoryList = availableCategories.map(cat => cat.name).join(", ");
+
+            return {
+                error: `Category '${categoryName}' not found.`,
+                availableCategories: categoryList || "No categories available"
+            };
+        }
+
+        return category._id;
+    } catch (error) {
+        console.error("Error in validateCategoryAndGetId:", error.message);
+        return { error: "Internal server error: " + error.message };
     }
-
-    return category._id;
 }
+
+
 
 async function createMenuItem(name, description, basePrice, category, imageUrl = "", toppings = []) {
 
     try {
 
-        // Validate and return category ID
-        const categoryId = await validateCategoryAndGetId(category);
+        // Validate category
+        const categoryResult = await validateCategoryAndGetId(category);
+
+        // Check if category is not found
+        if (categoryResult.error) {
+            console.error("Error in createMenuItem:", categoryResult.error);
+            return {
+                error: categoryResult.error,
+                availableCategories: categoryResult.availableCategories // Return available categories
+            };
+        }
 
         // Validate toppings (convert to ObjectIds)
         const toppingIds = toppings.map(toppingId => String(toppingId));
@@ -30,7 +55,7 @@ async function createMenuItem(name, description, basePrice, category, imageUrl =
             name,
             description,
             basePrice,
-            category: categoryId,
+            category: categoryResult,
             imageUrl,
             toppings: toppingIds
         });
@@ -79,7 +104,7 @@ async function updateMenuItem(menuItemId, updateData) {
 
         return updatedMenuItem;
     } catch (error) {
-        console.error("❌ Error updating menu item:", error.message);
+        console.error("Error updating menu item:", error.message);
         return { error: error.message };
     }
 }

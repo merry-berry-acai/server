@@ -9,10 +9,10 @@ const { createCategory } = require("../controllers/categoryController");
 
 // Sample Users
 const users = [
-    { name: "Danilo", email: "danilo@example.com", password: "password123", userRole: "customer" },
-    { name: "Ethan", email: "ethan@example.com", password: "password123", userRole: "customer" },
-    { name: "Joel", email: "joel@example.com", password: "password123", userRole: "customer" },
-    { name: "Peter", email: "peter@example.com", password: "password123", userRole: "shop owner" },
+    { name: "Danilo", email: "danilo@example.com", password: "password123"},
+    { name: "Ethan", email: "ethan@example.com", password: "password123"},
+    { name: "Joel", email: "joel@example.com", password: "password123"},
+    { name: "Peter", email: "peter@example.com", password: "password123", admin: true },
 ];
 
 // Sample Categories
@@ -85,7 +85,7 @@ async function seedDatabase() {
 
         console.log("Seeding Users...");
         const seededUsers = await Promise.all(
-            users.map(user => createUser(user.name, user.email, user.password, user.userRole))
+            users.map(user => createUser(user.name, user.email, user.password, user.admin))
         );
         console.log("Users Seeded Successfully!");
 
