@@ -29,7 +29,7 @@ async function getToppingById(toppingId) {
 
 async function getAllToppings() {
     try {
-        return await Topping.find().populate("category");
+        return await Topping.find();
     } catch (error) {
         console.error("Error fetching toppings:", error);
         throw new Error("Failed to fetch toppings");
