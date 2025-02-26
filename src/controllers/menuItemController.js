@@ -110,6 +110,29 @@ async function updateMenuItem(menuItemId, updateData) {
 }
 
 
+async function getItemsByCategory(categoryName) {
+    try {
+        // Validate category and get the category ID
+        const categoryId = await validateCategoryAndGetId(categoryName);
+
+        // If an error is returned from validation, return it directly
+        if (categoryId.error) {
+            return categoryId;
+        }
+
+        // Retrieve items that belong to the given category
+        const items = await Item.find({ category: categoryId }).populate("toppings");
+
+        return items.length > 0 ? items : { message: `No items found for category '${categoryName}'.` };
+
+    } catch (error) {
+        console.error("Error retrieving items by category:", error.message);
+        return { error: "Internal server error: " + error.message };
+    }
+}
+
+
+
 async function deleteMenuItem(menuItemId) {
     try {
         const deletedMenuItem = await Item.findByIdAndDelete(menuItemId);

@@ -8,6 +8,7 @@ const OrderRoutes = require("./routes/OrderRoutes");
 const ReviewRoutes = require("./routes/ReviewRoutes");
 const UserRoutes = require("./routes/UserRoutes");
 const ToppingRoutes = require("./routes/ToppingRoutes");
+const CategoryRoutes = require("./routes/CategoryRoutes");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/orders", OrderRoutes);
 app.use("/reviews", ReviewRoutes);
 app.use("/users", UserRoutes);
 app.use("/toppings", ToppingRoutes);
+app.use("/categories", CategoryRoutes);
 
 
 app.get("/", (req, res) => {
