@@ -46,7 +46,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get items by category
-router.get("/:categoryName", async (req, res) => {
+router.get("/category/:categoryName", async (req, res) => {
   const { categoryName } = req.params;
   const result = await getItemsByCategory(categoryName);
 
