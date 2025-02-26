@@ -1,12 +1,11 @@
 const { Topping } = require("../models/ToppingModel");
 
-async function createTopping(name, price = 0, availability = true, category) {
+async function createTopping(name, price = 0, availability = true) {
     try {
         const newTopping = new Topping({
             name,
             price,
-            availability,
-            category,
+            availability
         });
 
         await newTopping.save();
@@ -19,7 +18,7 @@ async function createTopping(name, price = 0, availability = true, category) {
 
 async function getToppingById(toppingId) {
     try {
-        const topping = await Topping.findById(toppingId).populate("category");
+        const topping = await Topping.findById(toppingId);
         if (!topping) throw new Error("Topping not found");
         return topping;
     } catch (error) {
@@ -30,7 +29,7 @@ async function getToppingById(toppingId) {
 
 async function getAllToppings() {
     try {
-        return await Topping.find().populate("category");
+        return await Topping.find();
     } catch (error) {
         console.error("Error fetching toppings:", error);
         throw new Error("Failed to fetch toppings");
@@ -43,7 +42,7 @@ async function updateTopping(toppingId, updateData) {
             toppingId,
             updateData,
             { new: true }
-        ).populate("category");
+        );
 
         if (!updatedTopping) throw new Error("Topping not found or update failed");
         return updatedTopping;

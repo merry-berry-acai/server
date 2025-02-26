@@ -13,9 +13,9 @@ const {
  */
 router.post("/new", async (req, res) => {
   try {
-    const { name, price, availability, category } = req.body;
+    const { name, price, availability} = req.body;
     const newTopping = await createTopping(name, price, availability, category);
-    res.status(201).json({ message: "Topping created successfully", data: newTopping });
+    res.status(201).json(newTopping);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -27,7 +27,7 @@ router.post("/new", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const topping = await getToppingById(req.params.id);
-    res.status(200).json({ message: "Request successful", data: topping });
+    res.status(200).json(topping);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -39,7 +39,7 @@ router.get("/:id", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const toppings = await getAllToppings();
-    res.status(200).json({ message: "Request successful", data: toppings });
+    res.status(200).json(toppings);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -51,7 +51,7 @@ router.get("/", async (req, res) => {
 router.patch("/:id", async (req, res) => {
   try {
     const updatedTopping = await updateTopping(req.params.id, req.body);
-    res.status(200).json({ message: "Topping updated successfully", data: updatedTopping });
+    res.status(200).json(updatedTopping);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

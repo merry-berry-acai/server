@@ -7,7 +7,7 @@ async function dbConnect() {
     let databaseUrl = process.env.MONGODB_URI || `mongodb://localhost:27017/merry-berry`;
     try {
         await mongoose.connect(databaseUrl);
-        console.log("Database connected");
+        console.log("Database connected\n",databaseUrl);
     }
     catch(err) {
         console.error("Cannot connect to the database", err);

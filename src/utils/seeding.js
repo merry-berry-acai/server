@@ -5,25 +5,64 @@ const { createReview } = require("../controllers/reviewController");
 const { createTopping } = require("../controllers/toppingController");
 const { createUser } = require("../controllers/userController");
 const { createPromoCode } = require("../controllers/promoCodeController");
+const { createCategory } = require("../controllers/categoryController");
 
 // Sample Users
 const users = [
-    { name: "Danilo", email: "danilo@example.com", password: "password123", userRole: "customer" },
-    { name: "Ethan", email: "ethan@example.com", password: "password123", userRole: "customer" },
-    { name: "Joel", email: "joel@example.com", password: "password123", userRole: "customer" },
-    { name: "Peter", email: "peter@example.com", password: "password123", userRole: "shop owner" },
+    { name: "Danilo", email: "danilo@example.com", password: "password123"},
+    { name: "Ethan", email: "ethan@example.com", password: "password123"},
+    { name: "Joel", email: "joel@example.com", password: "password123"},
+    { name: "Peter", email: "peter@example.com", password: "password123", admin: true },
+];
+
+// Sample Categories
+const categories = [
+    { name: "smoothie" },
+    { name: "akai" },
+    { name: "juice" },
 ];
 
 // Sample Menu Items
 const menuItems = [
-    { name: "Strawberry Smoothie", description: "A refreshing blend of strawberries and yogurt", basePrice: 5.99, category: "smoothie" },
-    { name: "Blueberry Acai Bowl", description: "A nutrient-packed bowl with acai, granola, and fruits", basePrice: 8.49, category: "akai" },
-    { name: "Mango Juice", description: "Freshly squeezed mango juice with a hint of lime", basePrice: 4.99, category: "juice" },
-    { name: "Tropical Smoothie", description: "A mix of pineapple, coconut, and banana", basePrice: 6.99, category: "smoothie" },
-    { name: "Acai Energy Boost", description: "Acai bowl with honey, banana, and nuts", basePrice: 7.99, category: "akai" },
+    {
+        name: "Strawberry Smoothie",
+        description: "A refreshing blend of strawberries and yogurt",
+        basePrice: 5.99,
+        category: "smoothie",
+        toppings: []
+    },
+    {
+        name: "Blueberry Acai Bowl",
+        description: "A nutrient-packed bowl with acai, granola, and fruits",
+        basePrice: 8.49,
+        category: "akai",
+        toppings: []
+    },
+    {
+        name: "Mango Juice",
+        description: "Freshly squeezed mango juice with a hint of lime",
+        basePrice: 4.99,
+        category: "juice",
+        toppings: []
+    },
+    {
+        name: "Tropical Smoothie",
+        description: "A mix of pineapple, coconut, and banana",
+        basePrice: 6.99,
+        category: "smoothie",
+        toppings: []
+    },
+    {
+        name: "Acai Energy Boost",
+        description: "Acai bowl with honey, banana, and nuts",
+        basePrice: 7.99,
+        category: "akai",
+        toppings: []
+    }
 ];
 
-// Sample Toppings
+
+// Sample Toppings (Optional)
 const toppings = [
     { name: "Chia Seeds", price: 1.00, availability: true },
     { name: "Almond Butter", price: 1.50, availability: true },
@@ -45,51 +84,100 @@ async function seedDatabase() {
         console.log("Database Connected...");
 
         console.log("Seeding Users...");
-        const seededUsers = [];
-        for (const user of users) {
-            const createdUser = await createUser(user.name, user.email, user.password, user.userRole);
-            seededUsers.push(createdUser);
-            console.log(`User Created: ${user.name}`);
-        }
+        const seededUsers = await Promise.all(
+            users.map(user => createUser(user.name, user.email, user.password, user.admin))
+        );
+        console.log("Users Seeded Successfully!");
 
-        console.log("Seeding Menu Items...");
-        const seededItems = [];
-        for (const item of menuItems) {
-            const createdItem = await createMenuItem(item.name, item.description, item.basePrice, item.category);
-            seededItems.push(createdItem);
-            console.log(`Menu Item Created: ${item.name}`);
-        }
+        console.log("Seeding Categories...");
+        const seededCategories = await Promise.all(
+            categories.map(category => createCategory(category.name))
+        );
+        console.log("Categories Seeded Successfully!");
 
         console.log("Seeding Toppings...");
-        const seededToppings = [];
-        for (const topping of toppings) {
-            const createdTopping = await createTopping(topping.name, topping.price, topping.availability);
-            seededToppings.push(createdTopping);
-            console.log(`Topping Created: ${topping.name}`);
-        }
+        const seededToppings = await Promise.all(
+            toppings.map(topping => createTopping(topping.name, topping.price, topping.availability))
+        );
+        console.log("Toppings Seeded Successfully!");
+
+
+        console.log("Seeding Menu Items...");
+
+        const randomToppings = seededToppings
+            .sort(() => 0.5 - Math.random()) // Shuffle array
+            .slice(0, Math.floor(Math.random() * seededToppings.length) +1);
+
+        const seededItems = await Promise.all(
+            menuItems.map(item => {
+                return createMenuItem(
+                    item.name,
+                    item.description,
+                    item.basePrice,
+                    item.category,
+                    item.imageUrl || "",
+                    randomToppings.map(t => t._id))
+            })
+
+        );
+        console.log("Menu Items Seeded Successfully!");
 
         console.log("Seeding Promo Codes...");
-        const seededPromos = [];
-        for (const promo of promoCodes) {
-            const createdPromo = await createPromoCode(promo.code, promo.discount, promo.startDate, promo.endDate, promo.minOrderAmount);
-            seededPromos.push(createdPromo);
-            console.log(`Promo Code Created: ${promo.code}`);
-        }
+        await Promise.all(
+            promoCodes.map(promo => createPromoCode(promo.code, promo.discount, promo.startDate, promo.endDate, promo.minOrderAmount))
+        );
+        console.log("Promo Codes Seeded Successfully!");
 
         console.log("Seeding Orders...");
-        for (const user of seededUsers) {
-            const order = await createOrder(user._id, [
-                { product: seededItems[0]._id, quantity: 2 },
-                { product: seededItems[1]._id, quantity: 1 },
-            ], 20.97, "No sugar added");
-            console.log(`Order Created for User: ${user.name}`);
-        }
+
+        // Assign hardcoded users to specific orders
+        const user1 = seededUsers[0]; // Danilo
+        const user2 = seededUsers[2]; // Joel
+
+        console.log(`Creating Order for ${user1.name}`);
+        const order1 = await createOrder(user1._id, [
+            {
+                product: seededItems[0]._id,
+                quantity: 2,
+                toppings: [seededToppings[1]._id]
+            },
+            {
+                product: seededItems[1]._id,
+                quantity: 1,
+                toppings: [seededToppings[1]._id, seededToppings[2]._id]
+            }
+        ], "No sugar added");
+
+        console.log(`Creating Order for ${user2.name}`);
+
+        const order2 = await createOrder(user2._id, [
+            {
+                product: seededItems[2]._id,
+                quantity: 4,
+            },
+            {
+                product: seededItems[3]._id,
+                quantity: 2,
+                toppings: [seededToppings[1]._id, seededToppings[3]._id]
+            }
+        ], "Less ice, please");
+
+        console.log(`Order Created for ${user1.name}`);
+        console.log(`Order Created for ${user2.name}`);
 
         console.log("Seeding Reviews...");
-        for (const user of seededUsers) {
-            const review = await createReview(user._id, seededItems[0]._id, 5, "Amazing taste and freshness!");
-            console.log(`Review Added by User: ${user.name}`);
-        }
+
+        const reviewer1 = seededUsers[1];
+        const reviewer2 = seededUsers[3];
+
+        console.log(`Creating Review from ${reviewer1.name}`);
+        await createReview(reviewer1._id, seededItems[0]._id, 5, "Amazing taste and freshness!");
+
+        console.log(`Creating Review from ${reviewer2.name}`);
+        await createReview(reviewer2._id, seededItems[1]._id, 4, "Great flavor but a bit too sweet for me.");
+
+        console.log(`Review Added by ${reviewer1.name}`);
+        console.log(`Review Added by ${reviewer2.name}`);
 
         console.log("Seeding Completed Successfully!");
     } catch (error) {

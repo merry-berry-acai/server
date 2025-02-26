@@ -6,6 +6,7 @@ const {
   getAllMenuItems,
   updateMenuItem,
   deleteMenuItem,
+  getItemsByCategory,
 } = require("../controllers/menuItemController");
 
 
@@ -27,7 +28,7 @@ router.post("/new", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const menuItem = await getMenuItemById(req.params.id);
-    res.status(200).json({ message: "Request successful", data: menuItem });
+    res.status(200).json(menuItem);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -44,6 +45,29 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Get featured items (first 3 items)
+router.get("/home/featured", async (req, res) => {
+  try {
+    const menuItems = await getAllMenuItems(3);
+    res.status(200).json(menuItems);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get items by category
+router.get("/category/:categoryName", async (req, res) => {
+  const { categoryName } = req.params;
+  const result = await getItemsByCategory(categoryName);
+
+  if (result.error) {
+      return res.status(400).json(result);
+  }
+
+  res.status(200).json(result);
+});
+
 
 
 

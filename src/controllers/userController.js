@@ -1,7 +1,7 @@
 const { User } = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 
-async function createUser(name, email, password, userRole) {
+async function createUser(name, email, password, admin=false) {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -9,7 +9,7 @@ async function createUser(name, email, password, userRole) {
             name,
             email,
             password: hashedPassword,
-            userRole,
+            admin,
         });
 
         await newUser.save();
@@ -22,7 +22,23 @@ async function createUser(name, email, password, userRole) {
 
 async function getUserById(userId) {
     try {
-        const user = await User.findById(userId).populate("orderHistory");
+
+        const user = await User.findById(userId)
+            .populate({
+                path: "orderHistory",
+                select: "_id items totalPrice", // Select order fields
+                populate: [
+                    {
+                        path: "items.product", // Populate product details
+                        select: "name basePrice category"
+                    },
+                    {
+                        path: "items.toppings", //Populate topping details
+                        select: "name price"
+                    }
+                ]
+            });
+
         if (!user) throw new Error("User not found");
         return user;
     } catch (error) {

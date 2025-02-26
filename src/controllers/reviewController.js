@@ -33,7 +33,7 @@ async function getReviewById(reviewId) {
 async function getReviewsByItem(itemId) {
     try {
         return await Review.find({ itemId })
-            .populate("userId", "name")
+            .populate("userId", "name email")
             .sort({ createdAt: -1 });
     } catch (error) {
         console.error("Error fetching reviews for item:", error);

@@ -16,7 +16,7 @@ router.post("/new", async (req, res) => {
   try {
     const { userId, itemId, rating, comment = "" } = req.body;
     const newReview = await createReview(userId, itemId, rating, comment);
-    res.status(201).json({ message: "Review created successfully", data: newReview });
+    res.status(201).json(newReview);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -28,7 +28,7 @@ router.post("/new", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const review = await getReviewById(req.params.id);
-    res.status(200).json({ message: "Request successful", data: review });
+    res.status(200).json(review);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -40,7 +40,7 @@ router.get("/:id", async (req, res) => {
 router.get("/item/:itemId", async (req, res) => {
   try {
     const reviews = await getReviewsByItem(req.params.itemId);
-    res.status(200).json({ message: "Request successful", data: reviews });
+    res.status(200).json(reviews);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -52,7 +52,7 @@ router.get("/item/:itemId", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const reviews = await getAllReviews();
-    res.status(200).json({ message: "Request successful", data: reviews });
+    res.status(200).json(reviews);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -64,7 +64,7 @@ router.get("/", async (req, res) => {
 router.patch("/:id", async (req, res) => {
   try {
     const updatedReview = await updateReview(req.params.id, req.body);
-    res.status(200).json({ message: "Review updated successfully", data: updatedReview });
+    res.status(200).json(updatedReview);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
