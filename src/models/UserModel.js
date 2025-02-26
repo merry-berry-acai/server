@@ -1,17 +1,13 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { 
-        type: String, 
-        required: true, 
-        unique: true, 
-        lowercase: true,
-        match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ // Basic regex for email validation
+    displayName: { type: String, required: true },
+    email: {
+        type: String,
     },
-    password: { type: String, required: true, minLength: 6 },
+
     orderHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
-    admin: { type: Boolean, default: false}
+    admin: { type: Boolean, default: false }
 }, {
     timestamps: true
 });

@@ -34,7 +34,7 @@ async function totalPrice(items) {
                 const topping = toppingDetails.find(t => t._id.equals(toppingId));
                 if (topping) {
                     console.log(`Topping ID: ${topping._id}, Name: ${topping.name}, Price: $${topping.price}`);
-                    orderToppingTotal += topping.price; // Add to total toppings price
+                    orderToppingTotal += (topping.price * item.quantity); // Add to total toppings price
                     return { _id: topping._id, name: topping.name, price: topping.price };
                 }
                 return null;
