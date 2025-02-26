@@ -28,7 +28,7 @@ router.post("/new", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const menuItem = await getMenuItemById(req.params.id);
-    res.status(200).json({ message: "Request successful", data: menuItem });
+    res.status(200).json(menuItem);
   } catch (error) {
     res.status(404).json({ error: error.message });
   }

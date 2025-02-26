@@ -19,7 +19,7 @@ router.post("/register", checkDuplicateUser, async (req, res) => {
   try {
       const { name, email, password, userRole } = req.body;
       const newUser = await createUser(name, email, password, userRole);
-      res.status(201).json({ message: "User created successfully", data: newUser });
+      res.status(201).json(newUser);
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
@@ -32,7 +32,7 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const authenticatedUser = await authenticateUser(email, password);
-    res.status(200).json({ message: "Authentication successful", data: authenticatedUser });
+    res.status(200).json(authenticatedUser);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -44,7 +44,7 @@ router.post("/login", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const user = await getUserById(req.params.id);
-    res.status(200).json({ message: "Request successful", data: user });
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -56,7 +56,7 @@ router.get("/:id", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const users = await getAllUsers();
-    res.status(200).json({ message: "Request successful", data: users });
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -68,7 +68,7 @@ router.get("/", async (req, res) => {
 router.patch("/:id", async (req, res) => {
   try {
     const updatedUser = await updateUser(req.params.id, req.body);
-    res.status(200).json({ message: "User updated successfully", data: updatedUser });
+    res.status(200).json(updatedUser);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

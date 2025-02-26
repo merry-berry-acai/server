@@ -11,7 +11,7 @@ const {
 const router = express.Router();
 
 // Create a category
-router.post("/", async (req, res) => {
+router.post("/new", async (req, res) => {
     try {
         const { name } = req.body;
         const category = await createCategory(name);
@@ -55,8 +55,9 @@ router.put("/:id", async (req, res) => {
 // Delete category
 router.delete("/:id", async (req, res) => {
     try {
+        deletedCategory = await getCategoryById(req.params.id);
         await deleteCategory(req.params.id);
-        res.status(204).end();
+        res.status(200).json({ message: `Category '${deletedCategory._id}' successfully deleted.` });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
