@@ -18,7 +18,7 @@ async function createTopping(name, price = 0, availability = true) {
 
 async function getToppingById(toppingId) {
     try {
-        const topping = await Topping.findById(toppingId).populate("category");
+        const topping = await Topping.findById(toppingId);
         if (!topping) throw new Error("Topping not found");
         return topping;
     } catch (error) {
@@ -42,7 +42,7 @@ async function updateTopping(toppingId, updateData) {
             toppingId,
             updateData,
             { new: true }
-        ).populate("category");
+        );
 
         if (!updatedTopping) throw new Error("Topping not found or update failed");
         return updatedTopping;
