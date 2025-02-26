@@ -46,10 +46,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get featured items
+// Get featured items (first 3 items)
 router.get("/home/featured", async (req, res) => {
   try {
-    const menuItems = await getAllMenuItems(4);
+    const menuItems = await getAllMenuItems(3);
     res.status(200).json(menuItems);
   } catch (error) {
     res.status(500).json({ error: error.message });
