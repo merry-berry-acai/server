@@ -6,6 +6,7 @@ const {
   getAllMenuItems,
   updateMenuItem,
   deleteMenuItem,
+  getItemsByCategory,
 } = require("../controllers/menuItemController");
 
 
