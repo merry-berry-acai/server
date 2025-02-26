@@ -45,6 +45,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get items by category
+router.get("/:categoryName", async (req, res) => {
+  const { categoryName } = req.params;
+  const result = await getItemsByCategory(categoryName);
+
+  if (result.error) {
+      return res.status(400).json(result);
+  }
+
+  res.status(200).json(result);
+});
+
+
 
 
 // Update a menu item by ID
