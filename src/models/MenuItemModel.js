@@ -6,7 +6,7 @@ const ITEM_CATEGORIES = ['smoothie', 'akai', 'juice'];
 const itemSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String },
-    imageUrl: { type: String, default: "" }, 
+    imageUrl: { type: String, default: "https://merry-berry.onrender.com/images/item-default.jpg" }, 
     basePrice: { type: Number, required: true },
     toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topping' }],
     category: {

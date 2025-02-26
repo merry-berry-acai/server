@@ -46,6 +46,16 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get featured items
+router.get("/home/featured", async (req, res) => {
+  try {
+    const menuItems = await getAllMenuItems(4);
+    res.status(200).json(menuItems);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get items by category
 router.get("/category/:categoryName", async (req, res) => {
   const { categoryName } = req.params;

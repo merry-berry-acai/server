@@ -79,9 +79,15 @@ async function getMenuItemById(menuItemId) {
     }
 }
 
-async function getAllMenuItems() {
+async function getAllMenuItems(limit = null) {
     try {
-        return await Item.find();
+        let query = Item.find();
+
+        if (limit) {
+            query = query.limit(limit);
+        }
+
+        return await query;
     } catch (error) {
         console.error("Error fetching menu items:", error);
         throw new Error("Failed to fetch menu items");
