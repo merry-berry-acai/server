@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-// Array of strings containing valid categories
-const ITEM_CATEGORIES = ['smoothie', 'akai', 'juice'];
 
 const itemSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -9,11 +7,6 @@ const itemSchema = new mongoose.Schema({
     imageUrl: { type: String, default: "https://merry-berry.onrender.com/images/item-default.jpg" }, 
     basePrice: { type: Number, required: true },
     toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topping' }],
-    category: {
-        type: String,  
-        enum: ITEM_CATEGORIES, // Ensures only valid categories are used
-        required: true,
-    },
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
     availability: { type: Boolean, default: true },
 }, {

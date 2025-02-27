@@ -14,8 +14,8 @@ const {
 // Create a new menu item
 router.post("/new", async (req, res) => {
   try {
-    const { name, description, basePrice, category, imageUrl } = req.body;
-    const newItem = await createMenuItem(name, description, basePrice, category, imageUrl);
+    const { name, description, basePrice, category, toppings, imageUrl } = req.body;
+    const newItem = await createMenuItem(name, description, basePrice, category, toppings, imageUrl);
       res.status(newItem.error ? newItem.status : 201).json(newItem);
 
   } catch (error) {
