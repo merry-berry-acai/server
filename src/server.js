@@ -3,7 +3,6 @@ const cors = require("cors");
 
 // Import route files
 const ItemRoutes = require("./routes/ItemRoutes");
-const PromoCodeRoutes = require("./routes/PromoCodeRoutes");
 const OrderRoutes = require("./routes/OrderRoutes");
 const ReviewRoutes = require("./routes/ReviewRoutes");
 const UserRoutes = require("./routes/UserRoutes");
@@ -26,7 +25,6 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/items", ItemRoutes);
-app.use("/promo", PromoCodeRoutes);
 app.use("/orders", OrderRoutes);
 app.use("/reviews", ReviewRoutes);
 app.use("/users", UserRoutes);
