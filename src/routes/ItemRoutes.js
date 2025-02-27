@@ -16,7 +16,8 @@ router.post("/new", async (req, res) => {
   try {
     const { name, description, basePrice, category, imageUrl } = req.body;
     const newItem = await createMenuItem(name, description, basePrice, category, imageUrl);
-    res.status(201).json(newItem);
+      res.status(newItem.error ? newItem.status : 201).json(newItem);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -62,7 +63,7 @@ router.get("/category/:categoryName", async (req, res) => {
   const result = await getItemsByCategory(categoryName);
 
   if (result.error) {
-      return res.status(400).json(result);
+    return res.status(400).json(result);
   }
 
   res.status(200).json(result);

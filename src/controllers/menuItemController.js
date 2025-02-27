@@ -18,6 +18,7 @@ async function validateCategoryAndGetId(categoryName) {
             const categoryList = availableCategories.map(cat => cat.name).join(", ");
 
             return {
+                status : 400,
                 error: `Category '${categoryName}' not found.`,
                 availableCategories: categoryList || "No categories available"
             };
@@ -43,6 +44,7 @@ async function createMenuItem(name, description, basePrice, category, imageUrl =
         if (categoryResult.error) {
             console.error("Error in createMenuItem:", categoryResult.error);
             return {
+                status: categoryResult.status,
                 error: categoryResult.error,
                 availableCategories: categoryResult.availableCategories // Return available categories
             };

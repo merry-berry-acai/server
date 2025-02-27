@@ -15,7 +15,7 @@ router.post("/new", async (req, res) => {
     try {
         const { name } = req.body;
         const category = await createCategory(name);
-        res.status(201).json(category);
+        res.status(category.error ? category.status : 201).json(category);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
