@@ -6,8 +6,7 @@ const {
   getUserById,
   getAllUsers,
   updateUser,
-  deleteUser,
-  authenticateUser,
+  deleteUser
 } = require("../controllers/userController");
 
 
@@ -15,28 +14,16 @@ const {
  * Create a new user
  */
 // Middleware `checkDuplicateUser` runs before `createUser`
-router.post("/register", checkDuplicateUser, async (req, res) => {
+router.post("/register", async (req, res) => {
   try {
-      const { name, email, password, userRole } = req.body;
-      const newUser = await createUser(name, email, password, userRole);
+      const { displayName, email, admin } = req.body;
+      const newUser = await createUser(displayName, email, admin);
       res.status(201).json(newUser);
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
 });
 
-/**
- * Authenticate user (Login)
- */
-router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const authenticatedUser = await authenticateUser(email, password);
-    res.status(200).json(authenticatedUser);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 /**
  * Get user by ID

@@ -1,15 +1,12 @@
 const { User } = require("../models/UserModel");
-const bcrypt = require("bcrypt");
 
-async function createUser(name, email, password, admin=false) {
+async function createUser(displayName, email, admin) {
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = new User({
-            name,
+            displayName,
             email,
-            password: hashedPassword,
-            admin,
+            admin
         });
 
         await newUser.save();
@@ -58,10 +55,6 @@ async function getAllUsers() {
 
 async function updateUser(userId, updateData) {
     try {
-        if (updateData.password) {
-            updateData.password = await bcrypt.hash(updateData.password, 10);
-        }
-
         const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
             new: true,
         }).populate("orderHistory");
@@ -85,26 +78,11 @@ async function deleteUser(userId) {
     }
 }
 
-async function authenticateUser(email, password) {
-    try {
-        const user = await User.findOne({ email });
-        if (!user) throw new Error("Invalid email or password");
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) throw new Error("Invalid email or password");
-
-        return user;
-    } catch (error) {
-        console.error("Authentication error:", error);
-        throw new Error("Failed to authenticate user");
-    }
-}
 
 module.exports = {
     createUser,
     getUserById,
     getAllUsers,
     updateUser,
-    deleteUser,
-    authenticateUser,
+    deleteUser
 };

@@ -4,15 +4,14 @@ const { createOrder } = require("../controllers/orderController");
 const { createReview } = require("../controllers/reviewController");
 const { createTopping } = require("../controllers/toppingController");
 const { createUser } = require("../controllers/userController");
-const { createPromoCode } = require("../controllers/promoCodeController");
 const { createCategory } = require("../controllers/categoryController");
 
 // Sample Users
 const users = [
-    { name: "Danilo", email: "danilo@example.com", password: "password123"},
-    { name: "Ethan", email: "ethan@example.com", password: "password123"},
-    { name: "Joel", email: "joel@example.com", password: "password123"},
-    { name: "Peter", email: "peter@example.com", password: "password123", admin: true },
+    { displayName: "Danilo", email: "danilo@example.com" },
+    { displayName: "Ethan", email: "ethan@example.com" },
+    { displayName: "Joel", email: "joel@example.com" },
+    { displayName: "Peter", email: "peter@example.com", admin: true },
 ];
 
 // Sample Categories
@@ -70,12 +69,6 @@ const toppings = [
     { name: "Honey Drizzle", price: 1.25, availability: true },
 ];
 
-// Sample Promo Codes
-const promoCodes = [
-    { code: "WELCOME10", discount: 10, startDate: new Date(), endDate: new Date(new Date().setDate(new Date().getDate() + 30)), minOrderAmount: 10 },
-    { code: "SUMMER20", discount: 20, startDate: new Date(), endDate: new Date(new Date().setDate(new Date().getDate() + 14)), minOrderAmount: 15 },
-    { code: "FRESH5", discount: 5, startDate: new Date(), endDate: new Date(new Date().setDate(new Date().getDate() + 60)), minOrderAmount: 5 },
-];
 
 // Function to seed the database
 async function seedDatabase() {
@@ -85,7 +78,7 @@ async function seedDatabase() {
 
         console.log("Seeding Users...");
         const seededUsers = await Promise.all(
-            users.map(user => createUser(user.name, user.email, user.password, user.admin))
+            users.map(user => createUser(user.displayName, user.email, user.admin))
         );
         console.log("Users Seeded Successfully!");
 
@@ -104,29 +97,26 @@ async function seedDatabase() {
 
         console.log("Seeding Menu Items...");
 
-        const randomToppings = seededToppings
-            .sort(() => 0.5 - Math.random()) // Shuffle array
-            .slice(0, Math.floor(Math.random() * seededToppings.length) +1);
 
         const seededItems = await Promise.all(
             menuItems.map(item => {
-                return createMenuItem(
+                const randomToppings = seededToppings
+                    .sort(() => 0.5 - Math.random()) // Shuffle array
+                    .slice(0, Math.floor(Math.random() * seededToppings.length) + 1);
+                
+                    return createMenuItem(
                     item.name,
                     item.description,
                     item.basePrice,
                     item.category,
-                    item.imageUrl || "",
-                    randomToppings.map(t => t._id))
+                    randomToppings.map(t => t.name),
+                    item.imageUrl || ""
+                )
+
             })
 
         );
         console.log("Menu Items Seeded Successfully!");
-
-        console.log("Seeding Promo Codes...");
-        await Promise.all(
-            promoCodes.map(promo => createPromoCode(promo.code, promo.discount, promo.startDate, promo.endDate, promo.minOrderAmount))
-        );
-        console.log("Promo Codes Seeded Successfully!");
 
         console.log("Seeding Orders...");
 
