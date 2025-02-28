@@ -1,46 +1,41 @@
 const express = require("express");
-const cors = require("cors");
-const requestLogger = require("./middlewares/requestLogger");
-
-
-
-// Import route files
-const ItemRoutes = require("./routes/ItemRoutes");
-const OrderRoutes = require("./routes/OrderRoutes");
-const ReviewRoutes = require("./routes/ReviewRoutes");
-const UserRoutes = require("./routes/UserRoutes");
-const ToppingRoutes = require("./routes/ToppingRoutes");
-const CategoryRoutes = require("./routes/CategoryRoutes");
-
 const app = express();
+const requestLogger = require("./middlewares/requestLogger");
+const { errorHandler } = require("./utils/errorHandler");
+const cors = require("cors");
 
-// Middleware
 app.use(express.json());
-app.use(cors({
-    origin: "*", // Allow all origins; adjust as needed for production
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-}));
-
 app.use(requestLogger);
 
-app.get("/", (req, res) => {
-    res.status(200).json({ message: "Server is running!" });
-});
+app.use(
+  cors({
+    origin: "*", // Allow all origins; adjust as needed for production
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  })
+);
 
+
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Server is running!" });
+});
 
 // Routes
-app.use("/items", ItemRoutes);
-app.use("/orders", OrderRoutes);
-app.use("/reviews", ReviewRoutes);
-app.use("/users", UserRoutes);
-app.use("/toppings", ToppingRoutes);
-app.use("/categories", CategoryRoutes);
+app.use("/items", require("./routes/ItemRoutes"));
+app.use("/orders", require("./routes/OrderRoutes"));
+app.use("/reviews", require("./routes/ReviewRoutes"));
+app.use("/users", require("./routes/UserRoutes"));
+app.use("/toppings", require("./routes/ToppingRoutes"));
+app.use("/categories", require("./routes/CategoryRoutes"));
 
+app.use(errorHandler);
 
-app.get("/", (req, res) => {
-    res.status(200).json({ message: "Server is running!" });
+// Handle 404 - Route not found
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: "error",
+    message: `Cannot ${req.method} ${req.originalUrl}`,
+  });
 });
 
-const router = express.Router()
 
-module.exports = { app, router };
+module.exports = { app };

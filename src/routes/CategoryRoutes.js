@@ -1,4 +1,8 @@
 const express = require("express");
+const router = express.Router();
+const { asyncHandler } = require("../utils/errorHandler");
+const { sendSuccess } = require("../utils/responseHandler");
+const { validateRequiredFields } = require("../middlewares/validate");
 const {
     createCategory,
     getAllCategories,
@@ -7,60 +11,54 @@ const {
     deleteCategory
 } = require("../controllers/categoryController");
 
-
-const router = express.Router();
-
 // Create a category
-router.post("/new", async (req, res) => {
-    try {
+router.post("/new", 
+    validateRequiredFields(['name']),
+    asyncHandler(async (req, res) => {
         const { name } = req.body;
         const category = await createCategory(name);
-        res.status(category.error ? category.status : 201).json(category);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
+        
+        if (category.error) {
+            return res.status(category.status || 400).json(category);
+        }
+        
+        sendSuccess(res, category, "Category created successfully", 201);
+    })
+);
 
 // Get all categories
-router.get("/", async (req, res) => {
-    try {
+router.get("/", 
+    asyncHandler(async (req, res) => {
         const categories = await getAllCategories();
-        res.status(200).json(categories);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+        sendSuccess(res, categories);
+    })
+);
 
 // Get category by ID
-router.get("/:id", async (req, res) => {
-    try {
+router.get("/:id", 
+    asyncHandler(async (req, res) => {
         const category = await getCategoryById(req.params.id);
-        res.status(200).json(category);
-    } catch (error) {
-        res.status(404).json({ error: error.message });
-    }
-});
+        sendSuccess(res, category);
+    })
+);
 
 // Update category
-router.put("/:id", async (req, res) => {
-    try {
+router.put("/:id", 
+    validateRequiredFields(['name']),
+    asyncHandler(async (req, res) => {
         const { name } = req.body;
         const updatedCategory = await updateCategory(req.params.id, name);
-        res.status(200).json(updatedCategory);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
+        sendSuccess(res, updatedCategory, "Category updated successfully");
+    })
+);
 
 // Delete category
-router.delete("/:id", async (req, res) => {
-    try {
-        deletedCategory = await getCategoryById(req.params.id);
+router.delete("/:id", 
+    asyncHandler(async (req, res) => {
+        const deletedCategory = await getCategoryById(req.params.id);
         await deleteCategory(req.params.id);
-        res.status(200).json({ message: `Category '${deletedCategory._id}' successfully deleted.` });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
+        sendSuccess(res, { id: deletedCategory._id }, `Category '${deletedCategory.name}' successfully deleted`);
+    })
+);
 
 module.exports = router;

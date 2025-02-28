@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { asyncHandler } = require("../utils/errorHandler");
+const { sendSuccess } = require("../utils/responseHandler");
+const { validateRequiredFields } = require("../middlewares/validate");
 const {
   createReview,
   getReviewById,
@@ -12,74 +15,63 @@ const {
 /**
  * Create a new review
  */
-router.post("/new", async (req, res) => {
-  try {
+router.post("/new", 
+  validateRequiredFields(['userId', 'itemId', 'rating']),
+  asyncHandler(async (req, res) => {
     const { userId, itemId, rating, comment = "" } = req.body;
     const newReview = await createReview(userId, itemId, rating, comment);
-    res.status(201).json(newReview);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, newReview, "Review created successfully", 201);
+  })
+);
 
 /**
  * Get a review by ID
  */
-router.get("/:id", async (req, res) => {
-  try {
+router.get("/:id", 
+  asyncHandler(async (req, res) => {
     const review = await getReviewById(req.params.id);
-    res.status(200).json(review);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, review);
+  })
+);
 
 /**
  * Get all reviews for a specific menu item
  */
-router.get("/item/:itemId", async (req, res) => {
-  try {
+router.get("/item/:itemId", 
+  asyncHandler(async (req, res) => {
     const reviews = await getReviewsByItem(req.params.itemId);
-    res.status(200).json(reviews);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, reviews);
+  })
+);
 
 /**
  * Get all reviews
  */
-router.get("/", async (req, res) => {
-  try {
+router.get("/", 
+  asyncHandler(async (req, res) => {
     const reviews = await getAllReviews();
-    res.status(200).json(reviews);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, reviews);
+  })
+);
 
 /**
  * Update a review by ID
  */
-router.patch("/:id", async (req, res) => {
-  try {
+router.patch("/:id", 
+  asyncHandler(async (req, res) => {
     const updatedReview = await updateReview(req.params.id, req.body);
-    res.status(200).json(updatedReview);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, updatedReview, "Review updated successfully");
+  })
+);
 
 /**
  * Delete a review by ID
  */
-router.delete("/:id", async (req, res) => {
-  try {
+router.delete("/:id", 
+  asyncHandler(async (req, res) => {
     const deletedReview = await deleteReview(req.params.id);
-    res.status(200).json({ message: `Review '${deletedReview._id}' successfully deleted.` });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, { id: deletedReview._id }, `Review '${deletedReview._id}' successfully deleted`);
+  })
+);
 
 module.exports = router;
