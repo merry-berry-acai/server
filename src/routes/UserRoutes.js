@@ -67,6 +67,7 @@ router.get("/:uid",
  */
 router.patch("/:uid", 
   validateUid,
+  checkDuplicateUser,
   asyncHandler(async (req, res) => {
     const updatedUser = await updateUserByUid(req.params.uid, req.body);
     sendSuccess(res, updatedUser);
