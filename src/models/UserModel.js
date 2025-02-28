@@ -1,13 +1,15 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
+    uid: { type: String, required: true, unique: true }, // Firebase UID
     displayName: { type: String, required: true },
     email: {
         type: String,
     },
-
+    photoURL: { type: String },
+    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
     orderHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
-    admin: { type: Boolean, default: false }
+    role: { type: String, default: 'user' },
 }, {
     timestamps: true
 });
