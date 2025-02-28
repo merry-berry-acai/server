@@ -1,11 +1,20 @@
 const { User } = require("../models/UserModel");
+const { ApiError } = require("../utils/errorHandler");
 
 async function createUser(userData) {
     try {
         const { uid, displayName, email, photoURL, favorites = [], role = 'user' } = userData;
         
-        // Set admin flag based on role for backward compatibility
-        const admin = role === 'admin';
+        // Check if user already exists
+        const existingUser = await User.findOne({ uid });
+        if (existingUser) {
+            throw new ApiError(409, `User with uid ${uid} already exists`);
+        }
+        
+        // Validate role is allowed
+        if (role && !['user', 'admin'].includes(role)) {
+            throw new ApiError(400, "Role must be either 'user' or 'admin'");
+        }
         
         const newUser = new User({
             uid,
@@ -19,8 +28,16 @@ async function createUser(userData) {
         await newUser.save();
         return newUser;
     } catch (error) {
+        // Re-throw ApiError instances
+        if (error instanceof ApiError) throw error;
+        
+        // Handle MongoDB duplicate key errors
+        if (error.code === 11000) {
+            throw new ApiError(409, `Duplicate value detected: ${Object.keys(error.keyValue)[0]} already exists`);
+        }
+        
         console.error("Error creating user:", error);
-        throw new Error("Failed to create user");
+        throw new ApiError(500, "Failed to create user");
     }
 }
 
@@ -43,11 +60,12 @@ async function getUserById(userId) {
                 ]
             });
 
-        if (!user) throw new Error("User not found");
+        if (!user) throw new ApiError(404, "User not found");
         return user;
     } catch (error) {
+        if (error instanceof ApiError) throw error;
         console.error("Error fetching user:", error);
-        throw new Error("Failed to fetch user");
+        throw new ApiError(500, "Failed to fetch user");
     }
 }
 
@@ -56,7 +74,7 @@ async function getAllUsers() {
         return await User.find().populate("orderHistory");
     } catch (error) {
         console.error("Error fetching users:", error);
-        throw new Error("Failed to fetch users");
+        throw new ApiError(500, "Failed to fetch users");
     }
 }
 
@@ -66,33 +84,38 @@ async function updateUser(userId, updateData) {
             new: true,
         }).populate("orderHistory");
 
-        if (!updatedUser) throw new Error("User not found or update failed");
+        if (!updatedUser) throw new ApiError(404, "User not found or update failed");
         return updatedUser;
     } catch (error) {
+        if (error instanceof ApiError) throw error;
         console.error("Error updating user:", error);
-        throw new Error("Failed to update user");
+        throw new ApiError(500, "Failed to update user");
     }
 }
 
 async function deleteUser(userId) {
     try {
         const deletedUser = await User.findByIdAndDelete(userId);
-        if (!deletedUser) throw new Error("User not found or already deleted");
+        if (!deletedUser) throw new ApiError(404, "User not found or already deleted");
         return deletedUser;
     } catch (error) {
+        if (error instanceof ApiError) throw error;
         console.error("Error deleting user:", error);
-        throw new Error("Failed to delete user");
+        throw new ApiError(500, "Failed to delete user");
     }
 }
 
 async function getUserRoleByUid(uid) {
     try {
-        const user = await User.findOne({ uid });
-        if (!user) throw new Error("User not found");
+        const user = await User.findOne({ uid }, 'role');
+        if (!user) {
+            throw new ApiError(404, `User with uid ${uid} not found`);
+        }
         return { role: user.role };
     } catch (error) {
+        if (error instanceof ApiError) throw error;
         console.error("Error fetching user role:", error);
-        throw new Error("Failed to fetch user role");
+        throw new ApiError(500, "Failed to fetch user role");
     }
 }
 
@@ -115,11 +138,15 @@ async function getUserByUid(uid) {
                 ]
             });
 
-        if (!user) throw new Error("User not found");
+        if (!user) {
+            throw new ApiError(404, `User with uid ${uid} not found`);
+        }
+        
         return user;
     } catch (error) {
+        if (error instanceof ApiError) throw error;
         console.error("Error fetching user by UID:", error);
-        throw new Error("Failed to fetch user");
+        throw new ApiError(500, "Failed to fetch user");
     }
 }
 
@@ -132,11 +159,12 @@ async function updateUserByUid(uid, updateData) {
             { new: true }
         ).populate("orderHistory");
 
-        if (!updatedUser) throw new Error("User not found or update failed");
+        if (!updatedUser) throw new ApiError(404, "User not found or update failed");
         return updatedUser;
     } catch (error) {
+        if (error instanceof ApiError) throw error;
         console.error("Error updating user by UID:", error);
-        throw new Error("Failed to update user");
+        throw new ApiError(500, "Failed to update user");
     }
 }
 
@@ -144,11 +172,12 @@ async function updateUserByUid(uid, updateData) {
 async function deleteUserByUid(uid) {
     try {
         const deletedUser = await User.findOneAndDelete({ uid });
-        if (!deletedUser) throw new Error("User not found or already deleted");
+        if (!deletedUser) throw new ApiError(404, "User not found or already deleted");
         return deletedUser;
     } catch (error) {
+        if (error instanceof ApiError) throw error;
         console.error("Error deleting user by UID:", error);
-        throw new Error("Failed to delete user");
+        throw new ApiError(500, "Failed to delete user");
     }
 }
 
