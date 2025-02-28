@@ -1,5 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const requestLogger = require("./middlewares/requestLogger");
+
+
 
 // Import route files
 const ItemRoutes = require("./routes/ItemRoutes");
@@ -17,6 +20,8 @@ app.use(cors({
     origin: "*", // Allow all origins; adjust as needed for production
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
+
+app.use(requestLogger);
 
 app.get("/", (req, res) => {
     res.status(200).json({ message: "Server is running!" });
