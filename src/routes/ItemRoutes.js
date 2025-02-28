@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { asyncHandler } = require("../utils/errorHandler");
+const { sendSuccess } = require("../utils/responseHandler");
+const { validateRequiredFields } = require("../middlewares/validate");
 const {
   createMenuItem,
   getMenuItemById,
@@ -9,91 +12,74 @@ const {
   getItemsByCategory,
 } = require("../controllers/menuItemController");
 
-
-
 // Create a new menu item
-router.post("/new", async (req, res) => {
-  try {
+router.post("/new", 
+  validateRequiredFields(['name', 'basePrice', 'category']),
+  asyncHandler(async (req, res) => {
     const { name, description, basePrice, category, toppings, imageUrl } = req.body;
     const newItem = await createMenuItem(name, description, basePrice, category, toppings, imageUrl);
-      res.status(newItem.error ? newItem.status : 201).json(newItem);
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-
+    
+    if (newItem.error) {
+      return res.status(newItem.status || 400).json(newItem);
+    }
+    
+    sendSuccess(res, newItem, "Menu item created successfully", 201);
+  })
+);
 
 // Get a menu item by ID
-router.get("/:id", async (req, res) => {
-  try {
+router.get("/:id", 
+  asyncHandler(async (req, res) => {
     const menuItem = await getMenuItemById(req.params.id);
-    res.status(200).json(menuItem);
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
-});
-
-
+    sendSuccess(res, menuItem);
+  })
+);
 
 // Get all menu items
-router.get("/", async (req, res) => {
-  try {
+router.get("/", 
+  asyncHandler(async (req, res) => {
     const menuItems = await getAllMenuItems();
-    res.status(200).json(menuItems);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, menuItems);
+  })
+);
 
 // Get featured items (first 3 items)
-router.get("/home/featured", async (req, res) => {
-  try {
+router.get("/home/featured", 
+  asyncHandler(async (req, res) => {
     const menuItems = await getAllMenuItems(3);
-    res.status(200).json(menuItems);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, menuItems);
+  })
+);
 
 // Get items by category
-router.get("/category/:categoryName", async (req, res) => {
-  const { categoryName } = req.params;
-  const result = await getItemsByCategory(categoryName);
+router.get("/category/:categoryName", 
+  asyncHandler(async (req, res) => {
+    const { categoryName } = req.params;
+    const result = await getItemsByCategory(categoryName);
 
-  if (result.error) {
-    return res.status(400).json(result);
-  }
+    if (result.error) {
+      return res.status(400).json(result);
+    }
 
-  res.status(200).json(result);
-});
-
-
-
+    sendSuccess(res, result);
+  })
+);
 
 // Update a menu item by ID
-router.patch("/:id", async (req, res) => {
-  try {
+router.patch("/:id", 
+  asyncHandler(async (req, res) => {
     const updatedItem = await updateMenuItem(req.params.id, req.body);
-    res.status(200).json(updatedItem);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-
+    sendSuccess(res, updatedItem, "Menu item updated successfully");
+  })
+);
 
 // Delete a menu item by ID
-router.delete("/:id", async (req, res) => {
-  try {
-    // get the item name first
+router.delete("/:id", 
+  asyncHandler(async (req, res) => {
     const deletedItem = await getMenuItemById(req.params.id);
     await deleteMenuItem(req.params.id);
-    res.status(200).json({ message: `Menu item '${deletedItem.name}' successfully deleted` });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+    sendSuccess(res, { id: req.params.id }, `Menu item '${deletedItem.name}' successfully deleted`);
+  })
+);
 
 module.exports = router;
