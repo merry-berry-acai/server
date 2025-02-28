@@ -3,7 +3,7 @@ const { ApiError } = require("../utils/errorHandler");
 
 async function createUser(userData) {
     try {
-        const { uid, displayName, email, photoURL, favorites = [], role = 'user' } = userData;
+        const { uid, displayName, email, photoURL = "", favorites = [], role = 'user' } = userData;
         
         // Check if user already exists
         const existingUser = await User.findOne({ uid });

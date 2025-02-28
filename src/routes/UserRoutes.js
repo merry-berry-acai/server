@@ -18,8 +18,10 @@ const {
 /**
  * Create a new user
  */
+
 router.post("/register", 
   validateRequiredFields(['uid', 'displayName', 'email']),
+  checkDuplicateUser,
   asyncHandler(async (req, res) => {
     const userData = {
       uid: req.body.uid,
@@ -34,6 +36,7 @@ router.post("/register",
     sendSuccess(res, newUser, 'User successfully registered', 201);
   })
 );
+
 
 /**
  * Get user role by Firebase UID

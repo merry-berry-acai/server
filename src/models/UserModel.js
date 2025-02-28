@@ -15,20 +15,15 @@ const userSchema = new mongoose.Schema(
         "Please provide a valid email address",
       ],
     },
-    photoURL: { type: String },
 
-    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
-    orderHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+    photoURL: { type: String, default: "" },
+    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+    orderHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
+    role: { type: String, default: 'user' },
+}, {
+    timestamps: true
+});
+
 
 const User = mongoose.model("User", userSchema);
 

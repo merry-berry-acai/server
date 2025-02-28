@@ -9,10 +9,12 @@ const Logger = require("./logger");
 
 // Sample Users
 const users = [
+
     { uid: "danilo123", displayName: "Danilo", email: "danilo@example.com", role: "user" },
     { uid: "ethan456", displayName: "Ethan", email: "ethan@example.com", role: "user" },
     { uid: "joel789", displayName: "Joel", email: "joel@example.com", role: "user" },
     { uid: "peter101", displayName: "Peter", email: "peter@example.com", role: "admin" },
+
 ];
 
 // Sample Categories
@@ -215,9 +217,11 @@ async function seedDatabase() {
         await dbConnect();
         Logger.info("Database Connected...");
 
+
         Logger.info("Seeding Users...");
         const seededUsers = await Promise.all(
             users.map(user => createUser(user))
+
         );
         Logger.success("Users Seeded Successfully!");
 
@@ -230,7 +234,12 @@ async function seedDatabase() {
         Logger.info("Seeding Toppings...");
         const seededToppings = await Promise.all(            toppings.map(topping => createTopping(topping.name, topping.price, topping.availability))        );        Logger.success("Toppings Seeded Successfully!");        Logger.info("Seeding Menu Items...");        const seededItems = await Promise.all(
             menuItems.map(item => {
-                // Use the predefined toppings instead of random ones
+
+                const randomToppings = seededToppings
+                    .sort(() => 0.5 - Math.random()) // Shuffle array
+                    .slice(0, Math.floor(Math.random() * seededToppings.length) + 1);
+
+
                 return createMenuItem(
                     item.name,
                     item.description,
