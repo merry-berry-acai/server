@@ -8,10 +8,10 @@ const { createCategory } = require("../controllers/categoryController");
 
 // Sample Users
 const users = [
-    { displayName: "Danilo", email: "danilo@example.com" },
-    { displayName: "Ethan", email: "ethan@example.com" },
-    { displayName: "Joel", email: "joel@example.com" },
-    { displayName: "Peter", email: "peter@example.com", admin: true },
+    { uid: "erg35g35h35h", displayName: "Danilo", email: "danilo@example.com", },
+    { uid: "erg35gsdagsdg35h35h", displayName: "Ethan", email: "ethan@example.com", },
+    { uid: "erg35gsdagsg35h35h", displayName: "Joel", email: "joel@example.com", },
+    { uid: "sfsrr", displayName: "Peter", email: "peter@example.com", role: true },
 ];
 
 // Sample Categories
@@ -77,8 +77,9 @@ async function seedDatabase() {
         console.log("Database Connected...");
 
         console.log("Seeding Users...");
+
         const seededUsers = await Promise.all(
-            users.map(user => createUser(user.displayName, user.email, user.admin))
+            users.map(user => createUser(user)) 
         );
         console.log("Users Seeded Successfully!");
 
@@ -103,8 +104,8 @@ async function seedDatabase() {
                 const randomToppings = seededToppings
                     .sort(() => 0.5 - Math.random()) // Shuffle array
                     .slice(0, Math.floor(Math.random() * seededToppings.length) + 1);
-                
-                    return createMenuItem(
+
+                return createMenuItem(
                     item.name,
                     item.description,
                     item.basePrice,

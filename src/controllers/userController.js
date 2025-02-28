@@ -2,7 +2,7 @@ const { User } = require("../models/UserModel");
 
 async function createUser(userData) {
     try {
-        const { uid, displayName, email, photoURL, favorites = [], role = 'user' } = userData;
+        const { uid, displayName, email, photoURL = "", favorites = [], role = 'user' } = userData;
         
         // Set admin flag based on role for backward compatibility
         const admin = role === 'admin';

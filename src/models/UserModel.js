@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
     },
-    photoURL: { type: String },
+    photoURL: { type: String, default: "" },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
     orderHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
     role: { type: String, default: 'user' },
