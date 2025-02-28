@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { checkDuplicateUser } = require("../middlewares/checkDuplicateUser");
+const { validateRequiredFields, validateUid } = require("../middlewares/validate");
+const { asyncHandler } = require("../utils/errorHandler");
+const { sendSuccess } = require("../utils/responseHandler");
 const {
   createUser,
   getUserById,
@@ -13,90 +15,78 @@ const {
   deleteUserByUid
 } = require("../controllers/userController");
 
-// Remove the request logging middleware from here as it's now handled globally
-
 /**
  * Create a new user
  */
-// Middleware `checkDuplicateUser` runs before `createUser`
-router.post("/register", async (req, res) => {
-  try {
-      const userData = {
-        uid: req.body.uid,
-        displayName: req.body.displayName,
-        email: req.body.email,
-        photoURL: req.body.photoURL,
-        favorites: req.body.favorites || [],
-        role: req.body.role || 'user'
-      };
-      
-      const newUser = await createUser(userData);
-      res.status(201).json(newUser);
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-});
+router.post("/register", 
+  validateRequiredFields(['uid', 'displayName', 'email']),
+  asyncHandler(async (req, res) => {
+    const userData = {
+      uid: req.body.uid,
+      displayName: req.body.displayName,
+      email: req.body.email,
+      photoURL: req.body.photoURL,
+      favorites: req.body.favorites || [],
+      role: req.body.role || 'user'
+    };
+    
+    const newUser = await createUser(userData);
+    sendSuccess(res, newUser, 'User successfully registered', 201);
+  })
+);
 
 /**
  * Get user role by Firebase UID
  */
-router.get("/:uid/role", async (req, res) => {
-  try {
+router.get("/:uid/role", 
+  validateUid,
+  asyncHandler(async (req, res) => {
     const roleData = await getUserRoleByUid(req.params.uid);
-    res.status(200).json(roleData);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, roleData);
+  })
+);
 
 /**
  * Get user by Firebase UID
  */
-router.get("/:uid", async (req, res) => {
-  try {
+router.get("/:uid", 
+  validateUid,
+  asyncHandler(async (req, res) => {
     const user = await getUserByUid(req.params.uid);
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, user);
+  })
+);
 
 /**
  * Update a user by Firebase UID
  */
-router.patch("/:uid", async (req, res) => {
-  try {
+router.patch("/:uid", 
+  validateUid,
+  asyncHandler(async (req, res) => {
     const updatedUser = await updateUserByUid(req.params.uid, req.body);
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, updatedUser);
+  })
+);
 
 /**
  * Delete a user by Firebase UID
  */
-router.delete("/:uid", async (req, res) => {
-  try {
+router.delete("/:uid", 
+  validateUid,
+  asyncHandler(async (req, res) => {
     const deletedUser = await deleteUserByUid(req.params.uid);
-    res.status(200).json({ message: `User with UID '${req.params.uid}' successfully deleted.` });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, { message: `User with UID '${req.params.uid}' successfully deleted.` });
+  })
+);
 
 /**
  * Get all users
  */
-router.get("/", async (req, res) => {
-  try {
+router.get("/", 
+  asyncHandler(async (req, res) => {
     const users = await getAllUsers();
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-
+    sendSuccess(res, users);
+  })
+);
 
 module.exports = router;
