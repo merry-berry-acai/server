@@ -3,6 +3,7 @@ const router = express.Router();
 const { validateRequiredFields, validateUid } = require("../middlewares/validate");
 const { asyncHandler } = require("../utils/errorHandler");
 const { sendSuccess } = require("../utils/responseHandler");
+const { checkDuplicateUser } = require("../middlewares/checkDuplicateUser");
 const {
   createUser,
   getUserById,
@@ -14,6 +15,7 @@ const {
   updateUserByUid,
   deleteUserByUid
 } = require("../controllers/userController");
+
 
 /**
  * Create a new user
