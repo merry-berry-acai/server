@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { asyncHandler } = require("../utils/errorHandler");
+const { sendSuccess } = require("../utils/responseHandler");
+const { validateRequiredFields } = require("../middlewares/validate");
 const {
   createTopping,
   getToppingById,
@@ -11,62 +14,53 @@ const {
 /**
  * Create a new topping
  */
-router.post("/new", async (req, res) => {
-  try {
-    const { name, price, availability} = req.body;
+router.post("/new", 
+  validateRequiredFields(['name', 'price']),
+  asyncHandler(async (req, res) => {
+    const { name, price, availability, category } = req.body;
     const newTopping = await createTopping(name, price, availability, category);
-    res.status(201).json(newTopping);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, newTopping, "Topping created successfully", 201);
+  })
+);
 
 /**
  * Get a topping by ID
  */
-router.get("/:id", async (req, res) => {
-  try {
+router.get("/:id", 
+  asyncHandler(async (req, res) => {
     const topping = await getToppingById(req.params.id);
-    res.status(200).json(topping);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, topping);
+  })
+);
 
 /**
  * Get all toppings
  */
-router.get("/", async (req, res) => {
-  try {
+router.get("/", 
+  asyncHandler(async (req, res) => {
     const toppings = await getAllToppings();
-    res.status(200).json(toppings);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, toppings);
+  })
+);
 
 /**
  * Update a topping by ID
  */
-router.patch("/:id", async (req, res) => {
-  try {
+router.patch("/:id", 
+  asyncHandler(async (req, res) => {
     const updatedTopping = await updateTopping(req.params.id, req.body);
-    res.status(200).json(updatedTopping);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, updatedTopping, "Topping updated successfully");
+  })
+);
 
 /**
  * Delete a topping by ID
  */
-router.delete("/:id", async (req, res) => {
-  try {
+router.delete("/:id", 
+  asyncHandler(async (req, res) => {
     const deletedTopping = await deleteTopping(req.params.id);
-    res.status(200).json({ message: `Topping '${deletedTopping._id}' successfully deleted.` });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, { id: deletedTopping._id }, `Topping '${deletedTopping._id}' successfully deleted`);
+  })
+);
 
 module.exports = router;
