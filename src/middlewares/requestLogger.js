@@ -1,16 +1,36 @@
-/**
- * Middleware for logging all incoming HTTP requests
- */
+const logger = require('../utils/logger');
+const chalk = require('chalk'); // You'll need to install this: npm install chalk@4.1.2 (using v4 for CommonJS)
+
+// Define colors for different HTTP methods
+const methodColors = {
+  GET: chalk.green,
+  POST: chalk.yellow,
+  PUT: chalk.blue,
+  PATCH: chalk.cyan,
+  DELETE: chalk.red,
+  OPTIONS: chalk.gray,
+  HEAD: chalk.gray
+};
+
 const requestLogger = (req, res, next) => {
-  const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${req.method} request to ${req.originalUrl} from ${req.ip}`);
+  const startTime = Date.now();
   
-  // Only log the body for non-GET requests to avoid cluttering the logs
-  if (req.method !== 'GET') {
-    console.log('Request body:', JSON.stringify(req.body, null, 2));
-  }
+  // Log when request is complete
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    logger.request(
+      req.method,
+      req.originalUrl,
+      res.statusCode
+    );
+    
+    // Log slow requests (> 1000ms) as warnings
+    if (duration > 1000) {
+      logger.warn(`Slow request: ${req.method} ${req.originalUrl} took ${duration}ms`);
+    }
+  });
   
-  next(); // Continue to the next middleware or route handler
+  next();
 };
 
 module.exports = requestLogger;
