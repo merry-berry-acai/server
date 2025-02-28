@@ -5,68 +5,207 @@ const { createReview } = require("../controllers/reviewController");
 const { createTopping } = require("../controllers/toppingController");
 const { createUser } = require("../controllers/userController");
 const { createCategory } = require("../controllers/categoryController");
+const Logger = require("./logger");
 
 // Sample Users
 const users = [
-    { displayName: "Danilo", email: "danilo@example.com" },
-    { displayName: "Ethan", email: "ethan@example.com" },
-    { displayName: "Joel", email: "joel@example.com" },
-    { displayName: "Peter", email: "peter@example.com", admin: true },
+    { uid: "danilo123", displayName: "Danilo", email: "danilo@example.com", role: "user" },
+    { uid: "ethan456", displayName: "Ethan", email: "ethan@example.com", role: "user" },
+    { uid: "joel789", displayName: "Joel", email: "joel@example.com", role: "user" },
+    { uid: "peter101", displayName: "Peter", email: "peter@example.com", role: "admin" },
 ];
 
 // Sample Categories
 const categories = [
-    { name: "smoothie" },
-    { name: "akai" },
-    { name: "juice" },
+    { name: "smoothies" },
+    { name: "acai bowls" },
+    { name: "snacks" },
 ];
 
 // Sample Menu Items
 const menuItems = [
     {
-        name: "Strawberry Smoothie",
-        description: "A refreshing blend of strawberries and yogurt",
-        basePrice: 5.99,
-        category: "smoothie",
-        toppings: []
+        name: "Berry Blast Smoothie",
+        description: "A vibrant blend of mixed berries, banana, and almond milk.",
+        imageUrl: "/images/berry_blast.jpg",
+        basePrice: 7.50,
+        toppings: [
+            "Fresh Berries",
+            "Honey Drizzle",
+            "Chia Seeds"
+        ],
+        category: "smoothies",
+        availability: true
     },
     {
-        name: "Blueberry Acai Bowl",
-        description: "A nutrient-packed bowl with acai, granola, and fruits",
-        basePrice: 8.49,
-        category: "akai",
-        toppings: []
+        name: "Tropical Green Smoothie",
+        description: "Spinach, mango, pineapple, and coconut water for a refreshing boost.",
+        imageUrl: "/images/tropical_green.jpg",
+        basePrice: 8.00,
+        toppings: [
+            "Granola",
+            "Coconut Flakes"
+        ],
+        category: "smoothies",
+        availability: true
     },
     {
-        name: "Mango Juice",
-        description: "Freshly squeezed mango juice with a hint of lime",
-        basePrice: 4.99,
-        category: "juice",
-        toppings: []
+        name: "Choc Peanut Butter Smoothie",
+        description: "Chocolate protein, banana, peanut butter, and oat milk. A protein-packed treat.",
+        imageUrl: "/images/choc_pb_smoothie.jpg",
+        basePrice: 8.50,
+        toppings: [
+            "Almond Butter",
+            "Protein Powder (Whey)"
+        ],
+        category: "smoothies",
+        availability: true
     },
     {
-        name: "Tropical Smoothie",
-        description: "A mix of pineapple, coconut, and banana",
-        basePrice: 6.99,
-        category: "smoothie",
-        toppings: []
+        name: "Classic Acai Bowl",
+        description: "Organic Acai blended with banana, topped with granola and honey.",
+        imageUrl: "/images/classic_acai_bowl.jpg",
+        basePrice: 9.99,
+        toppings: [
+            "Honey Drizzle",
+            "Granola"
+        ],
+        category: "acai bowls",
+        availability: true
     },
     {
-        name: "Acai Energy Boost",
-        description: "Acai bowl with honey, banana, and nuts",
-        basePrice: 7.99,
-        category: "akai",
-        toppings: []
+        name: "Tropical Acai Bowl",
+        description: "Acai blended with mango and coconut water, topped with fresh mango, coconut flakes, and chia seeds.",
+        imageUrl: "/images/tropical_acai_bowl.jpg",
+        basePrice: 11.50,
+        toppings: [
+            "Mango Cubes",
+            "Coconut Flakes",
+            "Chia Seeds"
+        ],
+        category: "acai bowls",
+        availability: true
+    },
+    {
+        name: "Berry Nut Acai Bowl",
+        description: "Acai with mixed berries, topped with almond butter, granola, and fresh berries.",
+        imageUrl: "/images/berry_nut_acai_bowl.jpg",
+        basePrice: 12.00,
+        toppings: [
+            "Almond Butter",
+            "Granola",
+            "Fresh Berries"
+        ],
+        category: "acai bowls",
+        availability: true
+    },
+    {
+        name: "Protein Bites (3 pack)",
+        description: "Homemade energy bites with oats, peanut butter, and protein powder.",
+        imageUrl: "/images/protein_bites.jpg",
+        basePrice: 4.50,
+        toppings: [],
+        category: "snacks",
+        availability: true
+    },
+    {
+        name: "Fruit Salad Cup",
+        description: "Freshly cut seasonal fruits. A light and healthy snack.",
+        imageUrl: "/images/fruit_salad.jpg",
+        basePrice: 5.00,
+        toppings: [],
+        category: "snacks",
+        availability: true
+    },
+    {
+        name: "Green Power Smoothie",
+        description: "Kale, green apple, ginger, lemon, and banana.",
+        imageUrl: "/images/green_power_smoothie.jpg",
+        basePrice: 7.00,
+        toppings: [
+            "Banana Slices",
+            "Chia Seeds"
+        ],
+        category: "smoothies",
+        availability: true
+    },
+    {
+        name: "Mango Tango Acai Bowl",
+        description: "Acai blended with mango, banana, and orange juice, topped with mango, strawberry, and muesli.",
+        imageUrl: "/images/mango_tango_acai_bowl.jpg",
+        basePrice: 12.50,
+        toppings: [
+            "Mango Cubes",
+            "Strawberry Slices",
+            "Muesli"
+        ],
+        category: "acai bowls",
+        availability: true
     }
 ];
 
-
-// Sample Toppings (Optional)
+// Sample Toppings
 const toppings = [
-    { name: "Chia Seeds", price: 1.00, availability: true },
-    { name: "Almond Butter", price: 1.50, availability: true },
-    { name: "Coconut Flakes", price: 0.75, availability: true },
-    { name: "Honey Drizzle", price: 1.25, availability: true },
+    {
+      name: "Chia Seeds",
+      price: 0.75,
+      availability: true
+    },
+    {
+      name: "Honey Drizzle",
+      price: 1.25,
+      availability: true
+    },
+    {
+      name: "Protein Powder (Whey)",
+      price: 2.00,
+      availability: true
+    },
+    {
+      name: "Granola",
+      price: 1.50,
+      availability: true
+    },
+    {
+      name: "Fresh Berries",
+      price: 2.50,
+      availability: true
+    },
+    {
+      name: "Coconut Flakes",
+      price: 1.00,
+      availability: true
+    },
+    {
+      name: "Almond Butter",
+      price: 1.75,
+      availability: true
+    },
+    {
+      name: "Extra Acai",
+      price: 3.00,
+      availability: true
+    },
+    {
+      name: "Muesli",
+      price: 1.50,
+      availability: true
+    },
+    {
+      name: "Banana Slices",
+      price: 1.00,
+      availability: true
+    },
+    {
+      name: "Strawberry Slices",
+      price: 1.50,
+      availability: true
+    },
+    {
+      name: "Mango Cubes",
+      price: 2.00,
+      availability: true
+    }
 ];
 
 
@@ -74,107 +213,100 @@ const toppings = [
 async function seedDatabase() {
     try {
         await dbConnect();
-        console.log("Database Connected...");
+        Logger.info("Database Connected...");
 
-        console.log("Seeding Users...");
+        Logger.info("Seeding Users...");
         const seededUsers = await Promise.all(
-            users.map(user => createUser(user.displayName, user.email, user.admin))
+            users.map(user => createUser(user))
         );
-        console.log("Users Seeded Successfully!");
+        Logger.success("Users Seeded Successfully!");
 
-        console.log("Seeding Categories...");
+        Logger.info("Seeding Categories...");
         const seededCategories = await Promise.all(
             categories.map(category => createCategory(category.name))
         );
-        console.log("Categories Seeded Successfully!");
+        Logger.success("Categories Seeded Successfully!");
 
-        console.log("Seeding Toppings...");
-        const seededToppings = await Promise.all(
-            toppings.map(topping => createTopping(topping.name, topping.price, topping.availability))
-        );
-        console.log("Toppings Seeded Successfully!");
-
-
-        console.log("Seeding Menu Items...");
-
-
-        const seededItems = await Promise.all(
+        Logger.info("Seeding Toppings...");
+        const seededToppings = await Promise.all(            toppings.map(topping => createTopping(topping.name, topping.price, topping.availability))        );        Logger.success("Toppings Seeded Successfully!");        Logger.info("Seeding Menu Items...");        const seededItems = await Promise.all(
             menuItems.map(item => {
-                const randomToppings = seededToppings
-                    .sort(() => 0.5 - Math.random()) // Shuffle array
-                    .slice(0, Math.floor(Math.random() * seededToppings.length) + 1);
-                
-                    return createMenuItem(
+                // Use the predefined toppings instead of random ones
+                return createMenuItem(
                     item.name,
                     item.description,
                     item.basePrice,
                     item.category,
-                    randomToppings.map(t => t.name),
+                    item.toppings,
                     item.imageUrl || ""
-                )
-
+                );
             })
+        ); // Missing closing parenthesis was here
+        Logger.success("Menu Items Seeded Successfully!");
 
-        );
-        console.log("Menu Items Seeded Successfully!");
-
-        console.log("Seeding Orders...");
+        Logger.info("Seeding Orders...");
 
         // Assign hardcoded users to specific orders
         const user1 = seededUsers[0]; // Danilo
         const user2 = seededUsers[2]; // Joel
 
-        console.log(`Creating Order for ${user1.name}`);
-        const order1 = await createOrder(user1._id, [
-            {
-                product: seededItems[0]._id,
-                quantity: 2,
-                toppings: [seededToppings[1]._id]
-            },
-            {
-                product: seededItems[1]._id,
-                quantity: 1,
-                toppings: [seededToppings[1]._id, seededToppings[2]._id]
-            }
-        ], "No sugar added");
+        // Use displayName instead of name property
+        // Logger.info(`Creating Order for ${user1.displayName}`);
+        // const order1 = await createOrder(user1._id, [
+        //     {
+        //         product: seededItems[0]._id,
+        //         quantity: 2,
+        //         toppings: [seededToppings[1]._id]
+        //     },
+        //     {
+        //         product: seededItems[1]._id,
+        //         quantity: 1,
+        //         toppings: [seededToppings[1]._id, seededToppings[2]._id]
+        //     }
+        // ], "No sugar added");
 
-        console.log(`Creating Order for ${user2.name}`);
+        // // Use displayName instead of name property
+        // Logger.info(`Creating Order for ${user2.displayName}`);
+        // const order2 = await createOrder(user2._id, [
+        //     {
+        //         product: seededItems[2]._id,
+        //         quantity: 4,
+        //     },
+        //     {
+        //         product: seededItems[3]._id,
+        //         quantity: 2,
+        //         toppings: [seededToppings[1]._id, seededToppings[3]._id]
+        //     }
+        // ], "Less ice, please");
 
-        const order2 = await createOrder(user2._id, [
-            {
-                product: seededItems[2]._id,
-                quantity: 4,
-            },
-            {
-                product: seededItems[3]._id,
-                quantity: 2,
-                toppings: [seededToppings[1]._id, seededToppings[3]._id]
-            }
-        ], "Less ice, please");
+        // // Use displayName instead of name property
+        // Logger.success(`Order Created for ${user1.displayName}`);
+        // Logger.success(`Order Created for ${user2.displayName}`);
 
-        console.log(`Order Created for ${user1.name}`);
-        console.log(`Order Created for ${user2.name}`);
+        // Logger.info("Seeding Reviews...");
 
-        console.log("Seeding Reviews...");
+        // const reviewer1 = seededUsers[1];
+        // const reviewer2 = seededUsers[3];
 
-        const reviewer1 = seededUsers[1];
-        const reviewer2 = seededUsers[3];
+        // // Use displayName instead of name property
+        // Logger.info(`Creating Review from ${reviewer1.displayName}`);
+        // await createReview(reviewer1._id, seededItems[0]._id, 5, "Amazing taste and freshness!");
 
-        console.log(`Creating Review from ${reviewer1.name}`);
-        await createReview(reviewer1._id, seededItems[0]._id, 5, "Amazing taste and freshness!");
+        // // Use displayName instead of name property
+        // Logger.info(`Creating Review from ${reviewer2.displayName}`);
+        // await createReview(reviewer2._id, seededItems[1]._id, 4, "Great flavor but a bit too sweet for me.");
 
-        console.log(`Creating Review from ${reviewer2.name}`);
-        await createReview(reviewer2._id, seededItems[1]._id, 4, "Great flavor but a bit too sweet for me.");
+        // // Use displayName instead of name property
+        // Logger.success(`Review Added by ${reviewer1.displayName}`);
+        // Logger.success(`Review Added by ${reviewer2.displayName}`);
 
-        console.log(`Review Added by ${reviewer1.name}`);
-        console.log(`Review Added by ${reviewer2.name}`);
-
-        console.log("Seeding Completed Successfully!");
+        Logger.success("Seeding Completed Successfully!");
     } catch (error) {
-        console.error("Error seeding database:", error);
+        Logger.error("Error seeding database: " + error.message);
+        // Print full error details for debugging
+        console.error(error);
     } finally {
         await dbDisconnect();
-        console.log("Database Disconnected.");
+        Logger.info("Database Disconnected.");
     }
 }
 
