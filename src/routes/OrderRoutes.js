@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { validateOrderStatus } = require("../middlewares/validateOrderStatus");
+const { asyncHandler } = require("../utils/errorHandler");
+const { sendSuccess } = require("../utils/responseHandler");
+const { validateRequiredFields } = require("../middlewares/validate");
 const {
   createOrder,
   getOrderById,
@@ -9,68 +12,58 @@ const {
   deleteOrder,
 } = require("../controllers/orderController");
 
-
 /**
  * Create a new order
  */
-router.post("/new", async (req, res) => {
-  try {
+router.post("/new", 
+  validateRequiredFields(['userId', 'items']),
+  asyncHandler(async (req, res) => {
     const { userId, items, specialInstructions = "" } = req.body;
     const newOrder = await createOrder(userId, items, specialInstructions);
-    res.status(201).json(newOrder);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, newOrder, "Order created successfully", 201);
+  })
+);
 
 /**
  * Get an order by ID
  */
-router.get("/:id", async (req, res) => {
-  try {
+router.get("/:id", 
+  asyncHandler(async (req, res) => {
     const order = await getOrderById(req.params.id);
-    res.status(200).json(order);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, order);
+  })
+);
 
 /**
  * Get all orders
  */
-router.get("/", async (req, res) => {
-  try {
+router.get("/", 
+  asyncHandler(async (req, res) => {
     const orders = await getAllOrders();
-    res.status(200).json(orders);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
+    sendSuccess(res, orders);
+  })
+);
 
 /**
  * Update order status
  */
-router.patch("/:id/status", validateOrderStatus, async (req, res) => {
-  try {
+router.patch("/:id/status", 
+  validateOrderStatus, 
+  asyncHandler(async (req, res) => {
     const { orderStatus } = req.body;
     const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);
-    res.status(200).json(updatedOrder);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    sendSuccess(res, updatedOrder, "Order status updated successfully");
+  })
+);
 
 /**
- * Delete an order by ID
+ * Delete an order by ID (currently commented out)
  */
-// router.delete("/:id", async (req, res) => {
-//   try {
+// router.delete("/:id", 
+//   asyncHandler(async (req, res) => {
 //     const deletedOrder = await deleteOrder(req.params.id);
-//     res.status(200).json({ message: `Order '${deletedOrder._id}' successfully deleted.` });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
+//     sendSuccess(res, { id: deletedOrder._id }, `Order '${deletedOrder._id}' successfully deleted`);
+//   })
+// );
 
 module.exports = router;
