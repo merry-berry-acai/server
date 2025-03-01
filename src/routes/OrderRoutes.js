@@ -4,67 +4,71 @@ const { validateOrderStatus } = require("../middlewares/validateOrderStatus");
 const { asyncHandler } = require("../utils/errorHandler");
 const { sendSuccess } = require("../utils/responseHandler");
 const { validateRequiredFields } = require("../middlewares/validate");
+const { checkUser } = require("../middlewares/checkUser");
 const {
-  createOrder,
-  getOrderById,
-  getAllOrders,
-  updateOrderStatus
+    createOrder,
+    getOrderById,
+    getAllOrders,
+    updateOrderStatus
 } = require("../controllers/orderController");
+
 
 
 /**
  * Create a new order
  */
 
-router.post("/new",
-  validateRequiredFields(['userId', 'items']),
-  asyncHandler(async (req, res) => {
-    const { userId, items, specialInstructions = "" } = req.body;
+// Apply `checkUser` middleware before creating an order
+router.post(
+    "/new",
+    validateRequiredFields(["uid", "items"]), // Require `uid` in the request body
+    checkUser, // Middleware to validate user and attach `userId`
+    asyncHandler(async (req, res) => {
+        const { items, specialInstructions = "" } = req.body;
 
-    // Call createOrder function
-    const newOrder = await createOrder(userId, items, specialInstructions);
+        // Use `req.userId` attached in middleware
+        const newOrder = await createOrder(req.userId, items, specialInstructions);
 
-    // Handle errors returned by createOrder
-    if (newOrder.error) {
-      console.error(newOrder.message);
-      return res.status(newOrder.status).json({ error: newOrder.message });
-    }
+        if (newOrder.error) {
+            return res.status(newOrder.status).json({ error: newOrder.message });
+        }
 
-    // Send success response only if no errors
-    sendSuccess(res, newOrder, "Order created successfully", 201);
-  })
+        sendSuccess(res, newOrder, "Order created successfully", 201);
+    })
 );
+
+module.exports = router;
 
 /**
  * Get an order by ID
  */
 router.get("/:id",
-  asyncHandler(async (req, res) => {
-    const order = await getOrderById(req.params.id);
-    sendSuccess(res, order);
-  })
+    asyncHandler(async (req, res) => {
+        const order = await getOrderById(req.params.id);
+        sendSuccess(res, order);
+    })
 );
 
 /**
  * Get all orders
  */
 router.get("/",
-  asyncHandler(async (req, res) => {
-    const orders = await getAllOrders();
-    sendSuccess(res, orders);
-  })
+    asyncHandler(async (req, res) => {
+        const orders = await getAllOrders();
+        sendSuccess(res, orders);
+    })
 );
 
 /**
  * Update order status
  */
 router.patch("/:id/status",
-  validateOrderStatus,
-  asyncHandler(async (req, res) => {
-    const { orderStatus } = req.body;
-    const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);
-    sendSuccess(res, updatedOrder, "Order status updated successfully");
-  })
+    validateOrderStatus,
+    asyncHandler(async (req, res) => {
+        const { orderStatus } = req.body;
+        const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);
+        sendSuccess(res, updatedOrder, "Order status updated successfully");
+    })
 );
 
 module.exports = router;
