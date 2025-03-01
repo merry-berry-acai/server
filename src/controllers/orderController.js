@@ -49,7 +49,7 @@ async function totalPrice(items) {
             }).filter(t => t !== null);
         });
 
-        console.log("Total Toppings Price for this order: $", orderToppingTotal);
+        console.log("Total TOPPINGS Price: $", orderToppingTotal);
     } catch (error) {
         console.error("Error retrieving topping prices:", error);
         return { error: true, status: 500, message: "Internal server error" };
@@ -92,7 +92,7 @@ async function totalPrice(items) {
             }
         }
 
-        console.log(`Total price of all items: $${orderProductsTotal}`);
+        console.log(`Total ITEMS price: $${orderProductsTotal}`);
 
     } catch (error) {
         console.error("Error retrieving product prices:", error);
@@ -104,7 +104,7 @@ async function totalPrice(items) {
     }
 
     totalPrice = orderProductsTotal + orderToppingTotal;
-    console.log("Total price including item and topping is: $", totalPrice);
+    console.log("Total ORDER including items and toppings is: $", totalPrice);
 
     return { error: false, totalPrice };
 }

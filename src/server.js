@@ -26,6 +26,7 @@ app.use("/reviews", require("./routes/ReviewRoutes"));
 app.use("/users", require("./routes/UserRoutes"));
 app.use("/toppings", require("./routes/ToppingRoutes"));
 app.use("/categories", require("./routes/CategoryRoutes"));
+app.use("/checkout", require("./routes/Payment"));
 
 app.use(errorHandler);
 
