@@ -8,18 +8,29 @@ const {
   createOrder,
   getOrderById,
   getAllOrders,
-  updateOrderStatus,
-  deleteOrder,
+  updateOrderStatus
 } = require("../controllers/orderController");
+
 
 /**
  * Create a new order
  */
-router.post("/new", 
+
+router.post("/new",
   validateRequiredFields(['userId', 'items']),
   asyncHandler(async (req, res) => {
     const { userId, items, specialInstructions = "" } = req.body;
+
+    // Call createOrder function
     const newOrder = await createOrder(userId, items, specialInstructions);
+
+    // Handle errors returned by createOrder
+    if (newOrder.error) {
+      console.error(newOrder.message);
+      return res.status(newOrder.status).json({ error: newOrder.message });
+    }
+
+    // Send success response only if no errors
     sendSuccess(res, newOrder, "Order created successfully", 201);
   })
 );
@@ -27,7 +38,7 @@ router.post("/new",
 /**
  * Get an order by ID
  */
-router.get("/:id", 
+router.get("/:id",
   asyncHandler(async (req, res) => {
     const order = await getOrderById(req.params.id);
     sendSuccess(res, order);
@@ -37,7 +48,7 @@ router.get("/:id",
 /**
  * Get all orders
  */
-router.get("/", 
+router.get("/",
   asyncHandler(async (req, res) => {
     const orders = await getAllOrders();
     sendSuccess(res, orders);
@@ -47,23 +58,13 @@ router.get("/",
 /**
  * Update order status
  */
-router.patch("/:id/status", 
-  validateOrderStatus, 
+router.patch("/:id/status",
+  validateOrderStatus,
   asyncHandler(async (req, res) => {
     const { orderStatus } = req.body;
     const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);
     sendSuccess(res, updatedOrder, "Order status updated successfully");
   })
 );
-
-/**
- * Delete an order by ID (currently commented out)
- */
-// router.delete("/:id", 
-//   asyncHandler(async (req, res) => {
-//     const deletedOrder = await deleteOrder(req.params.id);
-//     sendSuccess(res, { id: deletedOrder._id }, `Order '${deletedOrder._id}' successfully deleted`);
-//   })
-// );
 
 module.exports = router;

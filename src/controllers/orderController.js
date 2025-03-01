@@ -5,16 +5,17 @@ const mongoose = require("mongoose");
 const { User } = require("../models/UserModel");
 
 
-//Calculate the order's total price 
-// summing topping and item prices
-
+/**
+ * Calculate the order's total price.
+ * If an item or topping is missing, return an error with status code.
+ */
 async function totalPrice(items) {
     let totalPrice = 0;
-    let orderToppingTotal = 0; // Stores total toppings price for the whole order
+    let orderToppingTotal = 0;
     let orderProductsTotal = 0;
+    let errors = []; // Collects all errors instead of stopping execution
 
     try {
-
         // Extract all topping IDs from items
         const toppingIds = items.flatMap(item => item.toppings).filter(id => id);
         let toppingDetails = [];
@@ -22,19 +23,26 @@ async function totalPrice(items) {
         if (toppingIds.length > 0) {
             // Fetch toppings from the database
             toppingDetails = await Topping.find({ _id: { $in: toppingIds } }, "_id name price");
+
+            // Check for missing toppings
+            const foundToppingIds = toppingDetails.map(t => t._id.toString());
+            const missingToppings = toppingIds.filter(id => !foundToppingIds.includes(id.toString()));
+
+            if (missingToppings.length > 0) {
+                errors.push(`Toppings not found: ${missingToppings.join(", ")}`);
+            }
         }
 
-        // Iterate through items and retrieve each topping price
+        // Calculate total price for toppings
         items.forEach(item => {
             if (!Array.isArray(item.toppings)) {
-                item.toppings = []; // Ensure toppings is always an array
+                item.toppings = [];
             }
 
             item.toppings = item.toppings.map(toppingId => {
                 const topping = toppingDetails.find(t => t._id.equals(toppingId));
                 if (topping) {
-                    console.log(`Topping ID: ${topping._id}, Name: ${topping.name}, Price: $${topping.price}`);
-                    orderToppingTotal += (topping.price * item.quantity); // Add to total toppings price
+                    orderToppingTotal += (topping.price * item.quantity);
                     return { _id: topping._id, name: topping.name, price: topping.price };
                 }
                 return null;
@@ -44,72 +52,79 @@ async function totalPrice(items) {
         console.log("Total Toppings Price for this order: $", orderToppingTotal);
     } catch (error) {
         console.error("Error retrieving topping prices:", error);
-        throw new Error("Internal server error");
+        return { error: true, status: 500, message: "Internal server error" };
     }
 
-    //RETRIEVING PRODUCTS IDS
+    // Retrieve product details
     try {
-
         let productDetails = [];
-        const productsIds = items
-            .flatMap(item => item.product)
-            .filter(id => id);
+        const productsIds = items.map(item => item.product).filter(id => id);
 
         if (productsIds.length > 0) {
             productDetails = await Item.find({ _id: { $in: productsIds } }, "_id name basePrice");
+
+            // Check for missing products
+            const foundProductIds = productDetails.map(p => p._id.toString());
+            const missingProducts = productsIds.filter(id => !foundProductIds.includes(id.toString()));
+
+            if (missingProducts.length > 0) {
+                errors.push(`Products not found: ${missingProducts.join(", ")}`);
+            }
         }
 
-        // Iterate through items and retrieve each product price
-        await Promise.all(items.map(async (item) => {
+        // Calculate total price for items
+        for (const item of items) {
             try {
-                // Ensure item.product is a valid ObjectId
-                if (mongoose.Types.ObjectId.isValid(item.product)) {
-                    // Fetch product details asynchronously
-                    const product = await Item.findById(item.product);
+                if (!mongoose.Types.ObjectId.isValid(item.product)) {
+                    errors.push(`Invalid product ID: ${item.product}`);
+                    continue;
+                }
 
-                    if (product) {
-                        // Calculate total price for the product
-                        const productTotal = product.basePrice * item.quantity;
+                const product = await Item.findById(item.product);
 
-                        // Log the price of each product (product's base price and total)
-                        console.log(`Product: ${product.name}, Price: $${product.basePrice}, Quantity: ${item.quantity}, Total: $${productTotal}`);
-
-                        // Accumulate the total price
-                        orderProductsTotal += productTotal;
-                    } else {
-                        console.error(`Product not found for id: ${item.product}`);
-                    }
-                } else {
-                    console.error(`Invalid product id: ${item.product}`);
+                if (product) {
+                    const productTotal = product.basePrice * item.quantity;
+                    orderProductsTotal += productTotal;
                 }
             } catch (err) {
-                console.error(`Error retrieving product with id ${item.product}:`, err);
+                console.error(`Error retrieving product with ID ${item.product}:`, err);
+                return { error: true, status: 500, message: "Internal server error" };
             }
-        }));
+        }
 
         console.log(`Total price of all items: $${orderProductsTotal}`);
 
     } catch (error) {
-        console.error("Error retrieving products prices:", error);
-        throw new Error("Internal server error");
+        console.error("Error retrieving product prices:", error);
+        return { error: true, status: 500, message: "Internal server error" };
+    }
+
+    if (errors.length > 0) {
+        return { error: true, status: 404, message: errors.join(" | ") };
     }
 
     totalPrice = orderProductsTotal + orderToppingTotal;
     console.log("Total price including item and topping is: $", totalPrice);
-    return totalPrice;
+
+    return { error: false, totalPrice };
 }
 
 /**
- * Create a new order
+ * Create a new order.
+ * If an item or topping is missing, DO NOT create the order and return an error response.
  */
 async function createOrder(userId, items, specialInstructions = "") {
     try {
-        total = await totalPrice(items);
+        const priceResult = await totalPrice(items);
+
+        if (priceResult.error) {
+            return { error: true, status: priceResult.status, message: priceResult.message };
+        }
 
         const newOrder = new Order({
             user: userId,
             items,
-            totalPrice: total,
+            totalPrice: priceResult.totalPrice,
             specialInstructions
         });
 
@@ -118,17 +133,16 @@ async function createOrder(userId, items, specialInstructions = "") {
         // Add order to `orderHistory` in User model
         await User.findByIdAndUpdate(
             userId,
-            { $push: { orderHistory: newOrder._id } }, // Push order ID to history
+            { $push: { orderHistory: newOrder._id } },
             { new: true }
         );
 
-        return newOrder;
+        return { error: false, order: newOrder };
     } catch (error) {
         console.error("Error creating order:", error);
-        throw new Error("Internal server error");
+        return { error: true, status: 500, message: "Internal server error" };
     }
 }
-
 
 /**
  * Get order by ID (with populated fields)
@@ -190,24 +204,9 @@ async function updateOrderStatus(orderId, newStatus) {
 }
 
 
-/**
- * Delete an order
- */
-async function deleteOrder(orderId) {
-    try {
-        const deletedOrder = await Order.findByIdAndDelete(orderId);
-        if (!deletedOrder) throw new Error("Order not found or already deleted");
-        return deletedOrder;
-    } catch (error) {
-        console.error("Error deleting order:", error);
-        throw new Error("Failed to delete order");
-    }
-}
-
 module.exports = {
     createOrder,
     getOrderById,
     getAllOrders,
     updateOrderStatus,
-    deleteOrder,
 };
