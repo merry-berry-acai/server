@@ -3,6 +3,7 @@ const router = express.Router();
 const { StripeService } = require("../services/stripeService");
 const { asyncHandler } = require("../utils/errorHandler");
 const { validateRequiredFields } = require("../middlewares/validate");
+const { storeSuccessfulPayment } = require("../controllers/paymentController");
 
 
 // Route: Checkout (Create Payment Intent)
@@ -27,5 +28,26 @@ router.post(
         });
     })
 );
+
+router.post("/payment/store", async (req, res) => {
+    try {
+        const { paymentIntent, orderId = "" } = req.body;
+
+        if (!paymentIntent || !paymentIntent.id) {
+            console.error("Payment intent data is required");
+            return res.status(400).json({ error: "Payment intent data is required" });
+        }
+
+        const response = await storeSuccessfulPayment(paymentIntent, orderId);
+
+        console.log(response.message);
+        res.status(response.status).json(response);
+        
+    } catch (error) {
+        console.error("Error storing payment:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 
 module.exports = router;
