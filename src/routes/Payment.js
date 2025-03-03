@@ -35,11 +35,7 @@ router.post("/payment/store", async (req, res) => {
         let { paymentIntent, orderId } = req.body;
 
 
-        if (ObjectId.isValid(orderId)) {
-            orderId = new ObjectId(orderId); // Safe conversion using MongoDB's native ObjectId
-        } else {
-            orderId = new ObjectId(); // Generate a new ObjectId if not valid
-        }
+        orderId = new ObjectId(orderId); // Safe conversion using MongoDB's native ObjectId
 
         if (!paymentIntent || !paymentIntent.id) {
             console.error("Payment intent data is required");
