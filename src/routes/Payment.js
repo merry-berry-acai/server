@@ -31,7 +31,7 @@ router.post(
 
 router.post("/payment/store", async (req, res) => {
     try {
-        const { paymentIntent, orderId = "" } = req.body;
+        const { paymentIntent, orderId = null } = req.body;
 
         if (!paymentIntent || !paymentIntent.id) {
             console.error("Payment intent data is required");

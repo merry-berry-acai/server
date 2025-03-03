@@ -113,9 +113,11 @@ async function totalPrice(items) {
  * Create a new order.
  * If an item or topping is missing, DO NOT create the order and return an error response.
  */
-async function createOrder(userId, items, specialInstructions = "") {
+async function createOrder(userId, items, totalPrice, specialInstructions = "") {
     try {
-        const priceResult = await totalPrice(items);
+        //const priceResult = await totalPrice(items);
+
+        const priceResult = totalPrice;
 
         if (priceResult.error) {
             return { error: true, status: priceResult.status, message: priceResult.message };

@@ -22,12 +22,12 @@ const {
 router.post(
     "/new",
     validateRequiredFields(["uid", "items"]), // Require `uid` and `items`
-    checkUser, // Middleware to validate user and attach `userId`
+    checkUser, // Middleware to validate user and attach `userId` to the request ==> req.userId
     asyncHandler(async (req, res) => {
-        const { items, specialInstructions = "" } = req.body;
+        const { items, totalPrice, specialInstructions = "" } = req.body;
 
         // Use `req.userId` attached in middleware
-        const newOrder = await createOrder(req.userId, items, specialInstructions);
+        const newOrder = await createOrder(req.userId, items, totalPrice, specialInstructions);
 
         if (newOrder.error) {
             return res.status(newOrder.status).json({ error: newOrder.message });

@@ -2,12 +2,13 @@ const mongoose = require("mongoose");
 
 const PaymentSchema = new mongoose.Schema({
     orderId: {
-        // type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         
-        type: String, // Change from ObjectId to String temporarily
+        //type: String, // Change from ObjectId to String temporarily
 
         ref: "Order",
-        required: false
+        required: false,
+        default: null
     },
     paymentIntentId: {
         type: String,
