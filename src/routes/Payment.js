@@ -4,6 +4,7 @@ const { StripeService } = require("../services/stripeService");
 const { asyncHandler } = require("../utils/errorHandler");
 const { validateRequiredFields } = require("../middlewares/validate");
 const { storeSuccessfulPayment } = require("../controllers/paymentController");
+const mongoose = require("mongoose");
 
 
 // Route: Checkout (Create Payment Intent)
