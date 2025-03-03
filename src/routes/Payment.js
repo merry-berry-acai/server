@@ -4,7 +4,7 @@ const { StripeService } = require("../services/stripeService");
 const { asyncHandler } = require("../utils/errorHandler");
 const { validateRequiredFields } = require("../middlewares/validate");
 const { storeSuccessfulPayment } = require("../controllers/paymentController");
-const mongoose = require("mongoose");
+const { ObjectId } = require("mongodb");
 
 
 // Route: Checkout (Create Payment Intent)
@@ -34,7 +34,12 @@ router.post("/payment/store", async (req, res) => {
     try {
         let { paymentIntent, orderId } = req.body;
 
-        orderId = new mongoose.Types.ObjectId(orderId);
+
+        if (ObjectId.isValid(orderId)) {
+            orderId = new ObjectId(orderId); // Safe conversion using MongoDB's native ObjectId
+        } else {
+            orderId = new ObjectId(); // Generate a new ObjectId if not valid
+        }
 
         if (!paymentIntent || !paymentIntent.id) {
             console.error("Payment intent data is required");
@@ -45,7 +50,7 @@ router.post("/payment/store", async (req, res) => {
 
         console.log(response.message);
         res.status(response.status).json(response);
-        
+
     } catch (error) {
         console.error("Error storing payment:", error);
         res.status(500).json({ error: "Internal server error" });
