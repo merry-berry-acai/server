@@ -31,7 +31,9 @@ router.post(
 
 router.post("/payment/store", async (req, res) => {
     try {
-        const { paymentIntent, orderId } = req.body;
+        let { paymentIntent, orderId } = req.body;
+
+        orderId = new mongoose.Types.ObjectId(orderId);
 
         if (!paymentIntent || !paymentIntent.id) {
             console.error("Payment intent data is required");
