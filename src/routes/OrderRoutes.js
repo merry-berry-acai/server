@@ -26,6 +26,8 @@ router.post(
     asyncHandler(async (req, res) => {
         const { items, totalPrice, specialInstructions = "" } = req.body;
 
+        console.log("ALL GOOD");
+
         // Use `req.userId` attached in middleware
         const newOrder = await createOrder(req.userId, items, totalPrice, specialInstructions);
 
