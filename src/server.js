@@ -27,6 +27,7 @@ app.use("/users", require("./routes/UserRoutes"));
 app.use("/toppings", require("./routes/ToppingRoutes"));
 app.use("/categories", require("./routes/CategoryRoutes"));
 app.use("/checkout", require("./routes/Payment"));
+app.use("/images", require("./routes/ImageRoutes")); // Add the images route
 
 app.use(errorHandler);
 
