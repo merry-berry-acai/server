@@ -25,6 +25,8 @@ router.post(
     checkUser, // Middleware to validate user and attach `userId` to the request ==> req.userId
     asyncHandler(async (req, res) => {
         const { items, totalPrice, specialInstructions = "" } = req.body;
+        
+        console.log("ITEMS IN", items);
 
         console.log("ALL GOOD");
 
