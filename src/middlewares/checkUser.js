@@ -10,7 +10,11 @@ const checkUser = async (req, res, next) => {
         // Get Authorization header
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({ error: "Unauthorized: Missing or invalid token" });
+            console.warn("Proceeding as guest (no Authorization header)");
+            req.firebaseUid = null;
+            req.userId = null;
+            next();
+            return;
         }
 
         // Extract token from "Bearer <token>"

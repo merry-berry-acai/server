@@ -21,7 +21,7 @@ const {
 // Apply `checkUser` middleware before creating an order
 router.post(
     "/new",
-    validateRequiredFields(["items"]), // Require `uid` and `items`
+    validateRequiredFields(["items", "totalPrice"]), // Require `uid` and `items`
     checkUser, // Middleware to validate user and attach `userId` to the request ==> req.userId
     asyncHandler(async (req, res) => {
         const { items, totalPrice, specialInstructions = "" } = req.body;
