@@ -25,7 +25,7 @@ router.post(
     checkUser, // Middleware to validate user and attach `userId` to the request ==> req.userId
     asyncHandler(async (req, res) => {
         const { items, totalPrice, specialInstructions = "" } = req.body;
-        
+
         // Use `req.userId` attached in middleware
         const newOrder = await createOrder(req.userId, items, totalPrice, specialInstructions);
 

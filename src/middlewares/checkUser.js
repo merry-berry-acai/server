@@ -7,7 +7,7 @@ const { User } = require("../models/UserModel");
  */
 const checkUser = async (req, res, next) => {
     try {
-        // Get Authorization header
+        // Get Authorization header - if no authentication, continue as guest
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             console.warn("Proceeding as guest (no Authorization header)");

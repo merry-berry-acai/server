@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const requestLogger = require("./middlewares/requestLogger");
 const { errorHandler } = require("./utils/errorHandler");
-const helmet = require("helmet");
 
 const app = express();
 
@@ -16,15 +15,6 @@ app.use(
     })
 );
 
-
-app.use(helmet());
-
-app.use((req, res, next) => {
-  if (process.env.NODE_ENV === "production" && !req.secure) {
-    return res.redirect(301, `https://${req.headers.host}${req.url}`);
-  }
-  next();
-});
 
 
 app.get("/", (req, res) => {
