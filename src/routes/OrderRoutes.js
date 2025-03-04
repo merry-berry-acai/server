@@ -4,7 +4,7 @@ const { validateOrderStatus } = require("../middlewares/validateOrderStatus");
 const { asyncHandler } = require("../utils/errorHandler");
 const { sendSuccess } = require("../utils/responseHandler");
 const { validateRequiredFields } = require("../middlewares/validate");
-const { checkUser } = require("../middlewares/checkUser");
+const { checkUserId, checkUserFirebaseUid } = require("../middlewares/checkUser");
 const {
     createOrder,
     getOrderById,
@@ -22,7 +22,8 @@ const {
 router.post(
     "/new",
     validateRequiredFields(["items", "totalPrice"]), // Require `uid` and `items`
-    checkUser, // Middleware to validate user and attach `userId` to the request ==> req.userId
+    checkUserFirebaseUid, // Extract Firebase Uid from the header
+    checkUserId, // Middleware to validate user and attach `userId` to the request ==> req.userId
     asyncHandler(async (req, res) => {
         const { items, totalPrice, specialInstructions = "" } = req.body;
 
@@ -32,8 +33,7 @@ router.post(
         if (newOrder.error) {
             return res.status(newOrder.status).json({ error: newOrder.message });
         }
-
-        console.log("NEW ORDER", newOrder);
+        console.log("Order created succwsfully!")
         sendSuccess(res, newOrder, "Order created successfully", 201);
     })
 );

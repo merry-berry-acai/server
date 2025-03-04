@@ -4,14 +4,13 @@ const { validateRequiredFields } = require("../middlewares/validate");
 const { asyncHandler } = require("../utils/errorHandler");
 const { sendSuccess } = require("../utils/responseHandler");
 const { checkDuplicateUser } = require("../middlewares/checkDuplicateUser");
-const { checkUser } = require("../middlewares/checkUser");
+const { checkUserFirebaseUid } = require("../middlewares/checkUser");
 const {
     createUser,
     getUserById,
     getAllUsers,
     updateUser,
     deleteUser,
-    getUserRoleById,
     getUserByUid,
     updateUserByUid,
     deleteUserByUid
@@ -26,8 +25,12 @@ const {
 router.post("/register",
     validateRequiredFields(['displayName', 'email']),
     checkDuplicateUser,
-    checkUser,
+    checkUserFirebaseUid,
     asyncHandler(async (req, res) => {
+        if (req.firebaseUid == null) {
+            console.error('Firebase UID is required');
+            return res.status(400).json({ error: 'Firebase UID is required' });
+        }
         const userData = {
             uid: req.firebaseUid, // Firebase authentication id is extracted from the header using the middleware checkuser
             displayName: req.body.displayName,
@@ -47,7 +50,6 @@ router.post("/register",
  * Get user role by Id
  */
 router.get("/:id/role",
-    checkUser,
     asyncHandler(async (req, res) => {
         const roleData = await getUserById(req.params.id);
         sendSuccess(res, roleData.role);
@@ -79,7 +81,7 @@ router.get("/:id",
  * Update a user by Firebase UID
  */
 router.patch("/",
-    checkUser,
+    checkUserFirebaseUid,
     checkDuplicateUser,
     asyncHandler(async (req, res) => {
         const updatedUser = await updateUserByUid(req.firebaseUid, req.body);
@@ -92,7 +94,7 @@ router.patch("/",
  */
 //Only authenticated user can delete their own account 
 router.delete("/",
-    checkUser,
+    checkUserFirebaseUid,
     asyncHandler(async (req, res) => {
         const deletedUser = await deleteUserByUid(req.firebaseUid);
         sendSuccess(res, { message: `User with UID '${req.firebaseUid}' successfully deleted.` });

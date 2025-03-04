@@ -5,14 +5,13 @@ const { User } = require("../models/UserModel");
  * Middleware to extract Firebase UID without verification.
  * Attaches `req.userId = user._id` for order creation.
  */
-const checkUser = async (req, res, next) => {
+const checkUserFirebaseUid = async (req, res, next) => {
     try {
         // Get Authorization header - if no authentication, continue as guest
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             console.warn("Proceeding as guest (no Authorization header)");
             req.firebaseUid = null;
-            req.userId = null;
             next();
             return;
         }
@@ -33,19 +32,10 @@ const checkUser = async (req, res, next) => {
 
         console.log("Extracted Firebase UID: ", uid);
 
-        // Find the user in the database
-        const user = await User.findOne({ uid });
-
-        if (!user) {
-            req.userId = null;
-            console.log("NEW USER REGISTRATION");
-        }
 
         // Attach the Firebase UID to the request
         req.firebaseUid = uid;
 
-        // Attach user _id to the request
-        req.userId = user._id;
         next(); // Proceed to the next middleware
 
     } catch (error) {
@@ -54,4 +44,28 @@ const checkUser = async (req, res, next) => {
     }
 };
 
-module.exports = { checkUser };
+const checkUserId = async (req, res, next) => {
+    try {
+        // Find the user in the database by Firebase uid
+        uid = req.firebaseUid;
+        const user = await User.findOne({ uid });
+
+        if (user) {
+            req.userId = user._id;
+        }
+        else {
+            req.userId = null;
+            console.log("User not registered. Continue as guest");
+        }
+
+        next();
+
+    } catch (error) {
+        console.error("Error checking user:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+
+module.exports = { checkUserId, checkUserFirebaseUid };
