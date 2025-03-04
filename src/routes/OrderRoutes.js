@@ -11,6 +11,7 @@ const {
     getAllOrders,
     updateOrderStatus
 } = require("../controllers/orderController");
+const { checkAdminRole } = require("../middlewares/checkAdminRole");
 
 
 
@@ -23,7 +24,7 @@ router.post(
     "/new",
     validateRequiredFields(["items", "totalPrice"]), // Require `uid` and `items`
     checkUserFirebaseUid, // Extract Firebase Uid from the header
-    checkUserId, // Middleware to validate user and attach `userId` to the request ==> req.userId
+    checkUserId, // Middleware to validate user through Firebase and attach `userId` to the request ==> req.userId
     asyncHandler(async (req, res) => {
         const { items, totalPrice, specialInstructions = "" } = req.body;
 
@@ -43,6 +44,8 @@ router.post(
  * Get an order by ID
  */
 router.get("/:id",
+    checkUserFirebaseUid,
+    checkAdminRole,
     asyncHandler(async (req, res) => {
         const order = await getOrderById(req.params.id);
         sendSuccess(res, order);
@@ -53,6 +56,8 @@ router.get("/:id",
  * Get all orders
  */
 router.get("/",
+    checkUserFirebaseUid,
+    checkAdminRole,
     asyncHandler(async (req, res) => {
         const orders = await getAllOrders();
         sendSuccess(res, orders);
@@ -63,6 +68,8 @@ router.get("/",
  * Update order status
  */
 router.patch("/:id/status",
+    checkUserFirebaseUid,
+    checkAdminRole,
     validateOrderStatus,
     asyncHandler(async (req, res) => {
         const { orderStatus } = req.body;

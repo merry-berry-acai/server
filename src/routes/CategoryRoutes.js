@@ -10,24 +10,28 @@ const {
     updateCategory,
     deleteCategory
 } = require("../controllers/categoryController");
+const { checkUserFirebaseUid } = require("../middlewares/checkUser");
+const { checkAdminRole } = require("../middlewares/checkAdminRole");
 
 // Create a category
-router.post("/new", 
+router.post("/new",
+    checkUserFirebaseUid,
+    checkAdminRole,
     validateRequiredFields(['name']),
     asyncHandler(async (req, res) => {
         const { name } = req.body;
         const category = await createCategory(name);
-        
+
         if (category.error) {
             return res.status(category.status || 400).json(category);
         }
-        
+
         sendSuccess(res, category, "Category created successfully", 201);
     })
 );
 
 // Get all categories
-router.get("/", 
+router.get("/",
     asyncHandler(async (req, res) => {
         const categories = await getAllCategories();
         sendSuccess(res, categories);
@@ -35,7 +39,7 @@ router.get("/",
 );
 
 // Get category by ID
-router.get("/:id", 
+router.get("/:id",
     asyncHandler(async (req, res) => {
         const category = await getCategoryById(req.params.id);
         sendSuccess(res, category);
@@ -43,7 +47,9 @@ router.get("/:id",
 );
 
 // Update category
-router.put("/:id", 
+router.put("/:id",
+    checkUserFirebaseUid,
+    checkAdminRole,
     validateRequiredFields(['name']),
     asyncHandler(async (req, res) => {
         const { name } = req.body;
@@ -53,7 +59,9 @@ router.put("/:id",
 );
 
 // Delete category
-router.delete("/:id", 
+router.delete("/:id",
+    checkUserFirebaseUid,
+    checkAdminRole,
     asyncHandler(async (req, res) => {
         const deletedCategory = await getCategoryById(req.params.id);
         await deleteCategory(req.params.id);

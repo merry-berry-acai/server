@@ -15,6 +15,7 @@ const {
     updateUserByUid,
     deleteUserByUid
 } = require("../controllers/userController");
+const { checkAdminRole } = require("../middlewares/checkAdminRole");
 
 
 
@@ -50,6 +51,8 @@ router.post("/register",
  * Get user role by Id
  */
 router.get("/:id/role",
+    checkUserFirebaseUid,
+    checkAdminRole,
     asyncHandler(async (req, res) => {
         const roleData = await getUserById(req.params.id);
         sendSuccess(res, roleData.role);
@@ -57,25 +60,41 @@ router.get("/:id/role",
 );
 
 /**
- * Get user by Id
+ * Get all users
+ */
+router.get("/users/all",
+    checkUserFirebaseUid,
+    checkAdminRole,
+    asyncHandler(async (req, res) => {
+        console.log("all good");
+        const users = await getAllUsers();
+        sendSuccess(res, users);
+    })
+);
+
+
+/**
+ * Get user by Id (Get any user info. MUST be admin)
  */
 router.get("/:id",
+    checkUserFirebaseUid,
+    checkAdminRole,
     asyncHandler(async (req, res) => {
         const user = await getUserById(req.params.id);
         sendSuccess(res, user);
     })
 );
 
-// /**
-//  * Get user by Firebase UID
-//  */
-// router.get("/:uid",
-//     validateUid,
-//     asyncHandler(async (req, res) => {
-//         const user = await getUserByUid(req.params.uid);
-//         sendSuccess(res, user);
-//     })
-// );
+/**
+ * Get user by Firebase UID (only the authenticated user itself)
+ */
+router.get("/",
+    checkUserFirebaseUid,
+    asyncHandler(async (req, res) => {
+        const user = await getUserByUid(req.firebaseUid);
+        sendSuccess(res, user);
+    })
+);
 
 /**
  * Update a user by Firebase UID
@@ -98,16 +117,6 @@ router.delete("/",
     asyncHandler(async (req, res) => {
         const deletedUser = await deleteUserByUid(req.firebaseUid);
         sendSuccess(res, { message: `User with UID '${req.firebaseUid}' successfully deleted.` });
-    })
-);
-
-/**
- * Get all users
- */
-router.get("/",
-    asyncHandler(async (req, res) => {
-        const users = await getAllUsers();
-        sendSuccess(res, users);
     })
 );
 

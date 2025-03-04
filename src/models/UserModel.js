@@ -19,7 +19,11 @@ const userSchema = new mongoose.Schema(
     photoURL: { type: String, default: "" },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
     orderHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
-    role: { type: String, default: 'user' },
+    role: { 
+      type: String, 
+      enum: ["user", "admin"], // Only allow "user" or "admin"
+      default: "user" 
+    },
 }, {
     timestamps: true
 });
