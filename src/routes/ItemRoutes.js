@@ -75,7 +75,11 @@ router.patch("/:id",
     checkAdminRole,
     asyncHandler(async (req, res) => {
         const updatedItem = await updateMenuItem(req.params.id, req.body);
+        if (updatedItem.error) {
+            return res.status(400).json(updatedItem);
+        }
         sendSuccess(res, updatedItem, "Menu item updated successfully");
+
     })
 );
 

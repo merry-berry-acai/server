@@ -68,14 +68,25 @@ router.get("/",
  * Update order status
  */
 router.patch("/:id/status",
+    validateRequiredFields(["orderStatus"]),
     checkUserFirebaseUid,
     checkAdminRole,
     validateOrderStatus,
-    asyncHandler(async (req, res) => {
-        const { orderStatus } = req.body;
-        const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);
-        sendSuccess(res, updatedOrder, "Order status updated successfully");
+    asyncHandler(async (req, res, next) => {
+        try {
+            const { orderStatus } = req.body;
+            const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);
+
+            if (!updatedOrder) {
+                return res.status(404).json({ status: "error", message: "Order not found" }); 
+            }
+
+            sendSuccess(res, updatedOrder, "Order status updated successfully"); 
+        } catch (error) {
+            next(error);
+        }
     })
 );
+
 
 module.exports = router;
