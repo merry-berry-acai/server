@@ -99,19 +99,6 @@ async function deleteUser(userId) {
     }
 }
 
-async function getUserRoleByUid(uid) {
-    try {
-        const user = await User.findOne({ uid }, 'role');
-        if (!user) {
-            throw new ApiError(404, `User with uid ${uid} not found`);
-        }
-        return { role: user.role };
-    } catch (error) {
-        if (error instanceof ApiError) throw error;
-        console.error("Error fetching user role:", error);
-        throw new ApiError(500, "Failed to fetch user role");
-    }
-}
 
 // New function to get user by Firebase UID
 async function getUserByUid(uid) {
@@ -181,7 +168,6 @@ module.exports = {
     getAllUsers,
     updateUser, // Keep for backward compatibility
     deleteUser, // Keep for backward compatibility
-    getUserRoleByUid,
     getUserByUid,
     updateUserByUid,
     deleteUserByUid

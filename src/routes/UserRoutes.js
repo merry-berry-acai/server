@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { validateRequiredFields, validateUid } = require("../middlewares/validate");
+const { validateRequiredFields } = require("../middlewares/validate");
 const { asyncHandler } = require("../utils/errorHandler");
 const { sendSuccess } = require("../utils/responseHandler");
 const { checkDuplicateUser } = require("../middlewares/checkDuplicateUser");
@@ -11,7 +11,7 @@ const {
     getAllUsers,
     updateUser,
     deleteUser,
-    getUserRoleByUid,
+    getUserRoleById,
     getUserByUid,
     updateUserByUid,
     deleteUserByUid
@@ -44,35 +44,45 @@ router.post("/register",
 
 
 /**
- * Get user role by Firebase UID
+ * Get user role by Id
  */
-router.get("/:uid/role",
-    validateUid,
+router.get("/:id/role",
+    checkUser,
     asyncHandler(async (req, res) => {
-        const roleData = await getUserRoleByUid(req.params.uid);
-        sendSuccess(res, roleData);
+        const roleData = await getUserById(req.params.id);
+        sendSuccess(res, roleData.role);
     })
 );
 
 /**
- * Get user by Firebase UID
+ * Get user by Id
  */
-router.get("/:uid",
-    validateUid,
+router.get("/:id",
     asyncHandler(async (req, res) => {
-        const user = await getUserByUid(req.params.uid);
+        const user = await getUserById(req.params.id);
         sendSuccess(res, user);
     })
 );
 
+// /**
+//  * Get user by Firebase UID
+//  */
+// router.get("/:uid",
+//     validateUid,
+//     asyncHandler(async (req, res) => {
+//         const user = await getUserByUid(req.params.uid);
+//         sendSuccess(res, user);
+//     })
+// );
+
 /**
  * Update a user by Firebase UID
  */
-router.patch("/:uid",
-    validateUid,
+router.patch("/",
+    checkUser,
     checkDuplicateUser,
     asyncHandler(async (req, res) => {
-        const updatedUser = await updateUserByUid(req.params.uid, req.body);
+        const updatedUser = await updateUserByUid(req.firebaseUid, req.body);
         sendSuccess(res, updatedUser);
     })
 );
@@ -80,11 +90,12 @@ router.patch("/:uid",
 /**
  * Delete a user by Firebase UID
  */
-router.delete("/:uid",
-    validateUid,
+//Only authenticated user can delete their own account 
+router.delete("/",
+    checkUser,
     asyncHandler(async (req, res) => {
-        const deletedUser = await deleteUserByUid(req.params.uid);
-        sendSuccess(res, { message: `User with UID '${req.params.uid}' successfully deleted.` });
+        const deletedUser = await deleteUserByUid(req.firebaseUid);
+        sendSuccess(res, { message: `User with UID '${req.firebaseUid}' successfully deleted.` });
     })
 );
 

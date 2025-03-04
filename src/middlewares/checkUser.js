@@ -37,7 +37,8 @@ const checkUser = async (req, res, next) => {
         const user = await User.findOne({ uid });
 
         if (!user) {
-            return res.status(404).json({ error: "User not found. Please register before ordering." });
+            req.userId = null;
+            console.log("NEW USER REGISTRATION");
         }
 
         // Attach the Firebase UID to the request

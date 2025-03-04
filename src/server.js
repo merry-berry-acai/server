@@ -24,7 +24,6 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/items", require("./routes/ItemRoutes"));
 app.use("/orders", require("./routes/OrderRoutes"));
-app.use("/reviews", require("./routes/ReviewRoutes"));
 app.use("/users", require("./routes/UserRoutes"));
 app.use("/toppings", require("./routes/ToppingRoutes"));
 app.use("/categories", require("./routes/CategoryRoutes"));
