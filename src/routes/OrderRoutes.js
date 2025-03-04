@@ -21,15 +21,11 @@ const {
 // Apply `checkUser` middleware before creating an order
 router.post(
     "/new",
-    //validateRequiredFields(["uid", "items"]), // Require `uid` and `items`
+    validateRequiredFields(["items"]), // Require `uid` and `items`
     checkUser, // Middleware to validate user and attach `userId` to the request ==> req.userId
     asyncHandler(async (req, res) => {
         const { items, totalPrice, specialInstructions = "" } = req.body;
         
-        console.log("ITEMS IN", items);
-
-        console.log("ALL GOOD");
-
         // Use `req.userId` attached in middleware
         const newOrder = await createOrder(req.userId, items, totalPrice, specialInstructions);
 
@@ -37,6 +33,7 @@ router.post(
             return res.status(newOrder.status).json({ error: newOrder.message });
         }
 
+        console.log("NEW ORDER", newOrder);
         sendSuccess(res, newOrder, "Order created successfully", 201);
     })
 );

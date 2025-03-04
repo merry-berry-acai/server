@@ -4,18 +4,12 @@ const { ApiError } = require("../utils/errorHandler");
 async function createUser(userData) {
     try {
         const { uid, displayName, email, photoURL = "", favorites = [], role = 'user' } = userData;
-        
-        // Check if user already exists
-        const existingUser = await User.findOne({ uid });
-        if (existingUser) {
-            throw new ApiError(409, `User with uid ${uid} already exists`);
-        }
-        
+
         // Validate role is allowed
         if (role && !['user', 'admin'].includes(role)) {
             throw new ApiError(400, "Role must be either 'user' or 'admin'");
         }
-        
+
         const newUser = new User({
             uid,
             displayName,
@@ -30,12 +24,12 @@ async function createUser(userData) {
     } catch (error) {
         // Re-throw ApiError instances
         if (error instanceof ApiError) throw error;
-        
+
         // Handle MongoDB duplicate key errors
         if (error.code === 11000) {
             throw new ApiError(409, `Duplicate value detected: ${Object.keys(error.keyValue)[0]} already exists`);
         }
-        
+
         console.error("Error creating user:", error);
         throw new ApiError(500, "Failed to create user");
     }
@@ -141,7 +135,7 @@ async function getUserByUid(uid) {
         if (!user) {
             throw new ApiError(404, `User with uid ${uid} not found`);
         }
-        
+
         return user;
     } catch (error) {
         if (error instanceof ApiError) throw error;

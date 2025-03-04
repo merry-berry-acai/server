@@ -115,6 +115,7 @@ async function totalPrice(items) {
  */
 async function createOrder(userId, items, totalPrice, specialInstructions = "") {
     try {
+        //price is calculated in the frontend
         //const priceResult = await totalPrice(items);
 
         const priceResult = totalPrice;
@@ -138,6 +139,7 @@ async function createOrder(userId, items, totalPrice, specialInstructions = "") 
             { $push: { orderHistory: newOrder._id } },
             { new: true }
         );
+
 
         return { error: false, order: newOrder };
     } catch (error) {

@@ -1,4 +1,4 @@
-const chalk = require('chalk'); // You'll need to install this: npm install chalk@4.1.2
+const chalk = require('chalk'); 
 const logger = require('./logger');
 
 /**
