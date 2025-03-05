@@ -8,24 +8,28 @@ const {
     getMenuItemById,
     getAllMenuItems,
     updateMenuItem,
-    deleteMenuItem,
-    getItemsByCategory,
+    deleteMenuItem
 } = require("../controllers/menuItemController");
 const { checkUserFirebaseUid } = require("../middlewares/checkUser");
 const { checkAdminRole } = require("../middlewares/checkAdminRole");
 const { validateCategory } = require("../middlewares/validateItemCategory");
+const { validateToppings } = require("../middlewares/validateToppings");
 
 // Create a new menu item passing the names of toppings and name of category
 router.post("/new",
     validateRequiredFields(['name', 'basePrice', 'category']),
+    validateToppings,
     validateCategory,
     checkUserFirebaseUid,
     checkAdminRole,
     asyncHandler(async (req, res) => {
-        // get the categopryId from the middleware afer validation
-        category = req.categoryId;
-        const { name, description, basePrice, toppings, imageUrl } = req.body;
-        const newItem = await createMenuItem(name, description, basePrice, category, toppings, imageUrl);
+        // get the categopryIds from the middleware after validation
+        categoryIds = req.categoryId;
+
+        // get the toppingsIds from the middleware after validation
+        const toppingIds = req.toppingIds;
+        const { name, description, basePrice, imageUrl } = req.body;
+        const newItem = await createMenuItem(name, description, basePrice, categoryIds, toppingIds, imageUrl);
 
         if (newItem.error) {
             return res.status(newItem.status || 400).json(newItem);
@@ -59,29 +63,17 @@ router.get("/home/featured",
     })
 );
 
-// Get items by category
-router.get("/category/:categoryName",
-    asyncHandler(async (req, res) => {
-        const { categoryName } = req.params;
-        const result = await getItemsByCategory(categoryName);
-
-        if (result.error) {
-            return res.status(400).json(result);
-        }
-
-        sendSuccess(res, result);
-    })
-);
 
 // Update a menu item by ID
 router.patch("/:id",
-    validateCategory, 
+    validateCategory,
+    validateToppings,
     checkUserFirebaseUid,
     checkAdminRole,
     asyncHandler(async (req, res, next) => {
         try {
             const { id } = req.params;
-            
+
             // Dynamically build the update object
             const updateData = { ...req.body };
 
@@ -94,7 +86,7 @@ router.patch("/:id",
 
             return sendSuccess(res, updatedItem, "Menu item updated successfully", 200);
         } catch (error) {
-            next(error); 
+            next(error);
         }
     })
 );
