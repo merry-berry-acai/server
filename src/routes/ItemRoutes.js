@@ -13,14 +13,18 @@ const {
 } = require("../controllers/menuItemController");
 const { checkUserFirebaseUid } = require("../middlewares/checkUser");
 const { checkAdminRole } = require("../middlewares/checkAdminRole");
+const { validateCategory } = require("../middlewares/validateItemCategory");
 
-// Create a new menu item
+// Create a new menu item passing the names of toppings and name of category
 router.post("/new",
     validateRequiredFields(['name', 'basePrice', 'category']),
+    validateCategory,
     checkUserFirebaseUid,
     checkAdminRole,
     asyncHandler(async (req, res) => {
-        const { name, description, basePrice, category, toppings, imageUrl } = req.body;
+        // get the categopryId from the middleware afer validation
+        category = req.categoryId;
+        const { name, description, basePrice, toppings, imageUrl } = req.body;
         const newItem = await createMenuItem(name, description, basePrice, category, toppings, imageUrl);
 
         if (newItem.error) {
@@ -71,17 +75,30 @@ router.get("/category/:categoryName",
 
 // Update a menu item by ID
 router.patch("/:id",
+    validateCategory, 
     checkUserFirebaseUid,
     checkAdminRole,
-    asyncHandler(async (req, res) => {
-        const updatedItem = await updateMenuItem(req.params.id, req.body);
-        if (updatedItem.error) {
-            return res.status(400).json(updatedItem);
-        }
-        sendSuccess(res, updatedItem, "Menu item updated successfully");
+    asyncHandler(async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            
+            // Dynamically build the update object
+            const updateData = { ...req.body };
 
+            // If category is provided, use the validated categoryId from middleware
+            if (req.body.category) {
+                updateData.category = req.categoryId; //Only update category if provided
+            }
+
+            const updatedItem = await updateMenuItem(id, updateData);
+
+            return sendSuccess(res, updatedItem, "Menu item updated successfully", 200);
+        } catch (error) {
+            next(error); 
+        }
     })
 );
+
 
 // Delete a menu item by ID
 router.delete("/:id",

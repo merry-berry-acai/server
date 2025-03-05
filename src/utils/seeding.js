@@ -1,7 +1,6 @@
 const { dbConnect, dbDisconnect } = require("./database");
 const { createMenuItem } = require("../controllers/menuItemController");
 const { createOrder } = require("../controllers/orderController");
-const { createReview } = require("../controllers/reviewController");
 const { createTopping } = require("../controllers/toppingController");
 const { createUser } = require("../controllers/userController");
 const { createCategory } = require("../controllers/categoryController");
@@ -293,20 +292,6 @@ async function seedDatabase() {
 
         // Logger.info("Seeding Reviews...");
 
-        // const reviewer1 = seededUsers[1];
-        // const reviewer2 = seededUsers[3];
-
-        // // Use displayName instead of name property
-        // Logger.info(`Creating Review from ${reviewer1.displayName}`);
-        // await createReview(reviewer1._id, seededItems[0]._id, 5, "Amazing taste and freshness!");
-
-        // // Use displayName instead of name property
-        // Logger.info(`Creating Review from ${reviewer2.displayName}`);
-        // await createReview(reviewer2._id, seededItems[1]._id, 4, "Great flavor but a bit too sweet for me.");
-
-        // // Use displayName instead of name property
-        // Logger.success(`Review Added by ${reviewer1.displayName}`);
-        // Logger.success(`Review Added by ${reviewer2.displayName}`);
 
         Logger.success("Seeding Completed Successfully!");
     } catch (error) {

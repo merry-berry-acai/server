@@ -5,7 +5,7 @@ const validateOrderStatus = ({ body: { orderStatus } }, res, next) => {
     if (!orderStatus) {
         return res.status(400).json({ error: "Order status is required" });
     }
-    next();
+    
     // If `orderStatus` is invalid, return an error response
     if (!ORDER_STATUSES.includes(orderStatus)) {
         console.error(`Invalid orderStatus: "${orderStatus}". Allowed: ${ORDER_STATUSES.join(", ")}`);

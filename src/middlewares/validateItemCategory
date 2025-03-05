@@ -1,0 +1,34 @@
+const { Category } = require("../models/CategoryModel"); // Ensure you import your model
+
+const validateCategory = async (req, res, next) => {
+    try {
+        const { category } = req.body; // Extract category name from request body
+
+        // Search for the category name in the database
+        const resultCategory = await Category.findOne({ name: category });
+
+        if (!resultCategory) {
+            console.error(`Category '${category}' not found`);
+
+            // Retrieve all available categories
+            const availableCategories = await Category.find({}, "name").lean();
+            const categoryList = availableCategories.map(cat => cat.name).join(", ");
+
+            return res.status(404).json({
+                error: `Category '${category}' not found.`,
+                availableCategories: categoryList || "No categories available"
+            });
+        }
+
+        // Attach the category ID to the request object
+        req.categoryId = resultCategory._id;
+        next();
+
+
+    } catch (error) {
+        console.error("Error in validateCategory:", error.message);
+        return res.status(500).json({ error: "Internal server error: " + error.message });
+    }
+};
+
+module.exports = { validateCategory };
