@@ -66,7 +66,7 @@ router.get(
  * Get all users
  */
 router.get(
-  "/users/all",
+  "/all",
   checkUserFirebaseUid,
   checkAdminRole,
   asyncHandler(async (req, res) => {
@@ -115,17 +115,88 @@ router.patch(
 );
 
 /**
- * Delete a user by Firebase UID
+ * Delete a user - either by self or by admin
+ * If admin, can delete any user by ID
+ * If regular user, can only delete their own account
  */
-//Only authenticated user can delete their own account
 router.delete(
-  "/",
+  "/:id",
   checkUserFirebaseUid,
   asyncHandler(async (req, res) => {
-    const deletedUser = await deleteUserByUid(req.firebaseUid);
-    sendSuccess(res, {
-      message: `User with UID '${req.firebaseUid}' successfully deleted.`,
-    });
+    const userId = req.params.id;
+    const authUserUid = req.firebaseUid;
+
+    try {
+      // First, get the user making the request
+      const authUser = await getUserByUid(authUserUid);
+      if (!authUser) {
+        return res.status(401).json({
+          error: "Authentication failed",
+          message: "Your user account could not be verified",
+        });
+      }
+
+      // Check if admin or self-deletion
+      const isAdmin = authUser.role === "admin";
+      const targetUser = await getUserById(userId);
+
+      if (!targetUser) {
+        return res.status(404).json({
+          error: "User not found",
+          message: `No user found with ID: ${userId}`,
+        });
+      }
+
+      // Allow deletion only if admin or if user is deleting their own account
+      if (isAdmin || targetUser._id.toString() === authUser._id.toString()) {
+        // Perform the deletion
+        const deletedUser = await deleteUser(userId);
+
+        sendSuccess(res, {
+          message: `User successfully deleted`,
+          deletedUserId: userId,
+        });
+      } else {
+        return res.status(403).json({
+          error: "Permission denied",
+          message: "You do not have permission to delete this user account",
+        });
+      }
+    } catch (error) {
+      console.error("Error during user deletion:", error);
+      return res.status(error.statusCode || 500).json({
+        error: "Failed to delete user",
+        details: error.message || "Unknown server error during deletion",
+      });
+    }
+  })
+);
+
+/**
+ * Delete authenticated user's own account (alternative route)
+ */
+router.delete(
+  "/me/delete",
+  checkUserFirebaseUid,
+  asyncHandler(async (req, res) => {
+    try {
+      const deletedUser = await deleteUserByUid(req.firebaseUid);
+      if (!deletedUser) {
+        return res.status(404).json({
+          error: "Account not found",
+          message: "Your user account could not be found",
+        });
+      }
+      sendSuccess(res, {
+        message: "Your account has been successfully deleted",
+      });
+    } catch (error) {
+      console.error("Error deleting user account:", error);
+      return res.status(error.statusCode || 500).json({
+        error: "Failed to delete account",
+        details: error.message || "An unexpected error occurred",
+      });
+    }
   })
 );
 
