@@ -1,48 +1,51 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const ORDER_STATUSES = [
-    "Pending",
-    "Processing",
-    "Delivered",
-    "Cancelled",
-];
-
-const orderSchema = new mongoose.Schema(
+const OrderItemSchema = new Schema({
+  product: {
+    type: Schema.Types.ObjectId,
+    ref: "MenuItem",
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1,
+    default: 1,
+  },
+  toppings: [
     {
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: false,
-            default: null
-        },
-        items: [
-            {
-                product: { type: mongoose.Schema.Types.ObjectId, ref: "MenuItem", required: true },
-                quantity: { type: Number, required: true, min: 1 },
-                toppings: [{
-                    product:{ type: mongoose.Schema.Types.ObjectId, ref: "Topping", default: [] },
-                    quantity: {type: Number, required: false}
-            }],
-            },
-        ],
-        totalPrice: {
-            type: Number,
-            required: false
-        },
-        specialInstructions: {
-            type: String,
-            default: ""
-        },
-        orderStatus: {
-            type: String,
-            enum: ORDER_STATUSES, // Ensure only valid statuses are stored
-            default: "Pending", // Default status when order is created
-            required: false
-        },
+      type: Schema.Types.ObjectId,
+      ref: "Topping",
     },
-    { timestamps: true }
+  ],
+  notes: {
+    type: String,
+    trim: true,
+  },
+});
+
+const OrderSchema = new Schema(
+  {
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    items: [OrderItemSchema],
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "processing", "completed", "cancelled"],
+      default: "pending",
+    },
+  },
+  {
+    timestamps: true, // Add createdAt and updatedAt fields
+  }
 );
 
-const Order = mongoose.model("Order", orderSchema);
-
-module.exports = { Order };
+module.exports = mongoose.model("Order", OrderSchema);
