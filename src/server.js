@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const requestLogger = require("./middlewares/requestLogger");
 const { errorHandler, notFoundHandler } = require("./middlewares/errorHandler");
 const {
@@ -25,6 +26,10 @@ app.use(
   })
 );
 
+// Serve static files from public directory
+// This makes public/images/filename.jpeg accessible at /images/filename.jpeg
+app.use(express.static(path.join(__dirname, "../public")));
+
 // Authentication middleware
 app.use(checkUserFirebaseUid);
 app.use(checkUserId);
@@ -44,7 +49,8 @@ app.use("/users", require("./routes/UserRoutes"));
 app.use("/toppings", require("./routes/ToppingRoutes"));
 app.use("/categories", require("./routes/CategoryRoutes"));
 app.use("/checkout", require("./routes/Payment"));
-app.use("/images", require("./routes/ImageRoutes"));
+// Mount image routes at /api/images to avoid conflict with static files
+app.use("/api/images", require("./routes/ImageRoutes"));
 
 // Error handling middleware
 app.use(errorHandler);
