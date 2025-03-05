@@ -4,16 +4,17 @@ const { validateOrderStatus } = require("../middlewares/validateOrderStatus");
 const { asyncHandler } = require("../utils/errorHandler");
 const { sendSuccess } = require("../utils/responseHandler");
 const { validateRequiredFields } = require("../middlewares/validate");
-const { checkUserId, checkUserFirebaseUid } = require("../middlewares/checkUser");
 const {
-    createOrder,
-    getOrderById,
-    getAllOrders,
-    updateOrderStatus
+  checkUserId,
+  checkUserFirebaseUid,
+} = require("../middlewares/checkUser");
+const {
+  createOrder,
+  getOrderById,
+  getAllOrders,
+  updateOrderStatus,
 } = require("../controllers/orderController");
 const { checkAdminRole } = require("../middlewares/checkAdminRole");
-
-
 
 /**
  * Create a new order
@@ -21,72 +22,96 @@ const { checkAdminRole } = require("../middlewares/checkAdminRole");
 
 // Apply `checkUser` middleware before creating an order
 router.post(
-    "/new",
-    validateRequiredFields(["items", "totalPrice"]), // Require `uid` and `items`
-    checkUserFirebaseUid, // Extract Firebase Uid from the header
-    checkUserId, // Middleware to validate user through Firebase and attach `userId` to the request ==> req.userId
-    asyncHandler(async (req, res) => {
-        const { items, totalPrice, specialInstructions = "" } = req.body;
+  "/new",
+  validateRequiredFields(["items", "totalPrice"]), // Require `uid` and `items`
+  checkUserFirebaseUid, // Extract Firebase Uid from the header
+  checkUserId, // Middleware to validate user through Firebase and attach `userId` to the request ==> req.userId
+  asyncHandler(async (req, res) => {
+    if (!req.userId) {
+      return res.status(401).json({
+        error: "Authentication required",
+        message: "You must be logged in to place an order",
+        code: "AUTH_REQUIRED",
+      });
+    }
 
-        // Use `req.userId` attached in middleware
-        const newOrder = await createOrder(req.userId, items, totalPrice, specialInstructions);
+    const { items, totalPrice, specialInstructions = "" } = req.body;
 
-        if (newOrder.error) {
-            return res.status(newOrder.status).json({ error: newOrder.message });
-        }
-        console.log("Order created succwsfully!")
-        sendSuccess(res, newOrder, "Order created successfully", 201);
-    })
+    const orderResult = await createOrder(
+      req.userId,
+      items,
+      totalPrice,
+      specialInstructions
+    );
+
+    if (orderResult.error) {
+      return res.status(orderResult.status || 400).json({
+        error: orderResult.message,
+        details: orderResult.details,
+        code: orderResult.code,
+      });
+    }
+
+    return sendSuccess(
+      res,
+      orderResult.order,
+      "Order placed successfully",
+      201
+    );
+  })
 );
-
 
 /**
  * Get an order by ID
  */
-router.get("/:id",
-    checkUserFirebaseUid,
-    checkAdminRole,
-    asyncHandler(async (req, res) => {
-        const order = await getOrderById(req.params.id);
-        sendSuccess(res, order);
-    })
+router.get(
+  "/:id",
+  checkUserFirebaseUid,
+  checkAdminRole,
+  asyncHandler(async (req, res) => {
+    const order = await getOrderById(req.params.id);
+    sendSuccess(res, order);
+  })
 );
 
 /**
  * Get all orders
  */
-router.get("/",
-    checkUserFirebaseUid,
-    checkAdminRole,
-    asyncHandler(async (req, res) => {
-        const orders = await getAllOrders();
-        sendSuccess(res, orders);
-    })
+router.get(
+  "/",
+  checkUserFirebaseUid,
+  checkAdminRole,
+  asyncHandler(async (req, res) => {
+    const orders = await getAllOrders();
+    sendSuccess(res, orders);
+  })
 );
 
 /**
  * Update order status
  */
-router.patch("/:id/status",
-    validateRequiredFields(["orderStatus"]),
-    checkUserFirebaseUid,
-    checkAdminRole,
-    validateOrderStatus,
-    asyncHandler(async (req, res, next) => {
-        try {
-            const { orderStatus } = req.body;
-            const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);
+router.patch(
+  "/:id/status",
+  validateRequiredFields(["orderStatus"]),
+  checkUserFirebaseUid,
+  checkAdminRole,
+  validateOrderStatus,
+  asyncHandler(async (req, res, next) => {
+    try {
+      const { orderStatus } = req.body;
+      const updatedOrder = await updateOrderStatus(req.params.id, orderStatus);
 
-            if (!updatedOrder) {
-                return res.status(404).json({ status: "error", message: "Order not found" }); 
-            }
+      if (!updatedOrder) {
+        return res
+          .status(404)
+          .json({ status: "error", message: "Order not found" });
+      }
 
-            sendSuccess(res, updatedOrder, "Order status updated successfully"); 
-        } catch (error) {
-            next(error);
-        }
-    })
+      sendSuccess(res, updatedOrder, "Order status updated successfully");
+    } catch (error) {
+      next(error);
+    }
+  })
 );
-
 
 module.exports = router;
