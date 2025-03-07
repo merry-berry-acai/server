@@ -7,7 +7,7 @@ const itemSchema = new mongoose.Schema({
     imageUrl: { type: String, default: "https://merry-berry.onrender.com/images/item-default.jpg" }, 
     basePrice: { type: Number, required: true },
     toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topping' }],
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: false },
     availability: { type: Boolean, default: true },
 }, {
     timestamps: true // Enables createdAt and updatedAt fields

@@ -10,302 +10,302 @@ const fs = require("fs");
 
 // Sample Users
 const users = [
-  {
-    uid: "danilo123",
-    displayName: "Danilo",
-    email: "danilo@example.com",
-    role: "user",
-  },
-  {
-    uid: "ethan456",
-    displayName: "Ethan",
-    email: "ethan@example.com",
-    role: "user",
-  },
-  {
-    uid: "joel789",
-    displayName: "Joel",
-    email: "joel@example.com",
-    role: "user",
-  },
-  {
-    uid: "peter101",
-    displayName: "Peter",
-    email: "peter@example.com",
-    role: "admin",
-  },
+    {
+        uid: "danilo123",
+        displayName: "Danilo",
+        email: "danilo@example.com",
+        role: "user",
+    },
+    {
+        uid: "ethan456",
+        displayName: "Ethan",
+        email: "ethan@example.com",
+        role: "user",
+    },
+    {
+        uid: "joel789",
+        displayName: "Joel",
+        email: "joel@example.com",
+        role: "user",
+    },
+    {
+        uid: "peter101",
+        displayName: "Peter",
+        email: "peter@example.com",
+        role: "admin",
+    },
 ];
 
 // Sample Categories
 const categories = [
-  { name: "smoothies" },
-  { name: "acai bowls" },
-  { name: "snacks" },
+    { name: "smoothies" },
+    { name: "acai bowls" },
+    { name: "snacks" },
 ];
 
 // Sample Menu Items
 const menuItems = [
-  {
-    name: "Berry Blast Smoothie",
-    description: "A vibrant blend of mixed berries, banana, and almond milk.",
-    imageUrl: "/images/berry-blast-smoothie.jpeg",
-    basePrice: 7.5,
-    toppings: ["Fresh Berries", "Honey Drizzle", "Chia Seeds"],
-    category: "smoothies",
-    availability: true,
-  },
-  {
-    name: "Tropical Green Smoothie",
-    description:
-      "Spinach, mango, pineapple, and coconut water for a refreshing boost.",
-    imageUrl: "/images/tropical-green-smoothie.jpeg",
-    basePrice: 8.0,
-    toppings: ["Granola", "Coconut Flakes"],
-    category: "smoothies",
-    availability: true,
-  },
-  {
-    name: "Choc Peanut Butter Smoothie",
-    description:
-      "Chocolate protein, banana, peanut butter, and oat milk. A protein-packed treat.",
-    imageUrl: "/images/choc-peanut-smoothie.jpeg",
-    basePrice: 8.5,
-    toppings: ["Almond Butter", "Protein Powder (Whey)"],
-    category: "smoothies",
-    availability: true,
-  },
-  {
-    name: "Classic Acai Bowl",
-    description:
-      "Organic Acai blended with banana, topped with granola and honey.",
-    imageUrl: "/images/classic-acai-bowl.jpeg",
-    basePrice: 9.99,
-    toppings: ["Honey Drizzle", "Granola"],
-    category: "acai bowls",
-    availability: true,
-  },
-  {
-    name: "Tropical Acai Bowl",
-    description:
-      "Acai blended with mango and coconut water, topped with fresh mango, coconut flakes, and chia seeds.",
-    imageUrl: "/images/tropical-acai-bowl.jpeg",
-    basePrice: 11.5,
-    toppings: ["Mango Cubes", "Coconut Flakes", "Chia Seeds"],
-    category: "acai bowls",
-    availability: true,
-  },
-  {
-    name: "Berry Nut Acai Bowl",
-    description:
-      "Acai with mixed berries, topped with almond butter, granola, and fresh berries.",
-    imageUrl: "/images/berry-nut-acai-bowl.jpeg",
-    basePrice: 12.0,
-    toppings: ["Almond Butter", "Granola", "Fresh Berries"],
-    category: "acai bowls",
-    availability: true,
-  },
-  {
-    name: "Protein Bites (3 pack)",
-    description:
-      "Homemade energy bites with oats, peanut butter, and protein powder.",
-    imageUrl: "/images/protein-bites.jpeg",
-    basePrice: 4.5,
-    toppings: [],
-    category: "snacks",
-    availability: true,
-  },
-  {
-    name: "Fruit Salad Cup",
-    description: "Freshly cut seasonal fruits. A light and healthy snack.",
-    imageUrl: "/images/fruit-salad.jpeg",
-    basePrice: 5.0,
-    toppings: [],
-    category: "snacks",
-    availability: true,
-  },
-  {
-    name: "Green Power Smoothie",
-    description: "Kale, green apple, ginger, lemon, and banana.",
-    imageUrl: "/images/green-power-smoothie.jpeg",
-    basePrice: 7.0,
-    toppings: ["Banana Slices", "Chia Seeds"],
-    category: "smoothies",
-    availability: true,
-  },
-  {
-    name: "Mango Tango Acai Bowl",
-    description:
-      "Acai blended with mango, banana, and orange juice, topped with mango, strawberry, and muesli.",
-    imageUrl: "/images/mango-tango-bowl.jpeg",
-    basePrice: 12.5,
-    toppings: ["Mango Cubes", "Strawberry Slices", "Muesli"],
-    category: "acai bowls",
-    availability: true,
-  },
+    {
+        name: "Berry Blast Smoothie",
+        description: "A vibrant blend of mixed berries, banana, and almond milk.",
+        imageUrl: "/images/berry-blast-smoothie.jpeg",
+        basePrice: 7.5,
+        //toppings: ["Fresh Berries", "Honey Drizzle", "Chia Seeds"],
+        //category: "smoothies",
+        availability: true,
+    },
+    {
+        name: "Tropical Green Smoothie",
+        description:
+            "Spinach, mango, pineapple, and coconut water for a refreshing boost.",
+        imageUrl: "/images/tropical-green-smoothie.jpeg",
+        basePrice: 8.0,
+        //toppings: ["Granola", "Coconut Flakes"],
+        //category: "smoothies",
+        availability: true,
+    },
+    {
+        name: "Choc Peanut Butter Smoothie",
+        description:
+            "Chocolate protein, banana, peanut butter, and oat milk. A protein-packed treat.",
+        imageUrl: "/images/choc-peanut-smoothie.jpeg",
+        basePrice: 8.5,
+        //toppings: ["Almond Butter", "Protein Powder (Whey)"],
+        //category: "smoothies",
+        availability: true,
+    },
+    {
+        name: "Classic Acai Bowl",
+        description:
+            "Organic Acai blended with banana, topped with granola and honey.",
+        imageUrl: "/images/classic-acai-bowl.jpeg",
+        basePrice: 9.99,
+        //toppings: ["Honey Drizzle", "Granola"],
+        //category: "acai bowls",
+        availability: true,
+    },
+    {
+        name: "Tropical Acai Bowl",
+        description:
+            "Acai blended with mango and coconut water, topped with fresh mango, coconut flakes, and chia seeds.",
+        imageUrl: "/images/tropical-acai-bowl.jpeg",
+        basePrice: 11.5,
+        //toppings: ["Mango Cubes", "Coconut Flakes", "Chia Seeds"],
+        //category: "acai bowls",
+        availability: true,
+    },
+    {
+        name: "Berry Nut Acai Bowl",
+        description:
+            "Acai with mixed berries, topped with almond butter, granola, and fresh berries.",
+        imageUrl: "/images/berry-nut-acai-bowl.jpeg",
+        basePrice: 12.0,
+        //toppings: ["Almond Butter", "Granola", "Fresh Berries"],
+        //category: "acai bowls",
+        availability: true,
+    },
+    {
+        name: "Protein Bites (3 pack)",
+        description:
+            "Homemade energy bites with oats, peanut butter, and protein powder.",
+        imageUrl: "/images/protein-bites.jpeg",
+        basePrice: 4.5,
+        //toppings: [],
+        //category: "snacks",
+        availability: true,
+    },
+    {
+        name: "Fruit Salad Cup",
+        description: "Freshly cut seasonal fruits. A light and healthy snack.",
+        imageUrl: "/images/fruit-salad.jpeg",
+        basePrice: 5.0,
+        //toppings: [],
+        //category: "snacks",
+        availability: true,
+    },
+    {
+        name: "Green Power Smoothie",
+        description: "Kale, green apple, ginger, lemon, and banana.",
+        imageUrl: "/images/green-power-smoothie.jpeg",
+        basePrice: 7.0,
+        //toppings: ["Banana Slices", "Chia Seeds"],
+        //category: "smoothies",
+        availability: true,
+    },
+    {
+        name: "Mango Tango Acai Bowl",
+        description:
+            "Acai blended with mango, banana, and orange juice, topped with mango, strawberry, and muesli.",
+        imageUrl: "/images/mango-tango-bowl.jpeg",
+        basePrice: 12.5,
+        //toppings: ["Mango Cubes", "Strawberry Slices", "Muesli"],
+        //category: "acai bowls",
+        availability: true,
+    },
 ];
 
 // Sample Toppings
 const toppings = [
-  {
-    name: "Chia Seeds",
-    price: 0.75,
-    availability: true,
-  },
-  {
-    name: "Honey Drizzle",
-    price: 1.25,
-    availability: true,
-  },
-  {
-    name: "Protein Powder (Whey)",
-    price: 2.0,
-    availability: true,
-  },
-  {
-    name: "Granola",
-    price: 1.5,
-    availability: true,
-  },
-  {
-    name: "Fresh Berries",
-    price: 2.5,
-    availability: true,
-  },
-  {
-    name: "Coconut Flakes",
-    price: 1.0,
-    availability: true,
-  },
-  {
-    name: "Almond Butter",
-    price: 1.75,
-    availability: true,
-  },
-  {
-    name: "Extra Acai",
-    price: 3.0,
-    availability: true,
-  },
-  {
-    name: "Muesli",
-    price: 1.5,
-    availability: true,
-  },
-  {
-    name: "Banana Slices",
-    price: 1.0,
-    availability: true,
-  },
-  {
-    name: "Strawberry Slices",
-    price: 1.5,
-    availability: true,
-  },
-  {
-    name: "Mango Cubes",
-    price: 2.0,
-    availability: true,
-  },
+    {
+        name: "Chia Seeds",
+        price: 0.75,
+        availability: true,
+    },
+    {
+        name: "Honey Drizzle",
+        price: 1.25,
+        availability: true,
+    },
+    {
+        name: "Protein Powder (Whey)",
+        price: 2.0,
+        availability: true,
+    },
+    {
+        name: "Granola",
+        price: 1.5,
+        availability: true,
+    },
+    {
+        name: "Fresh Berries",
+        price: 2.5,
+        availability: true,
+    },
+    {
+        name: "Coconut Flakes",
+        price: 1.0,
+        availability: true,
+    },
+    {
+        name: "Almond Butter",
+        price: 1.75,
+        availability: true,
+    },
+    {
+        name: "Extra Acai",
+        price: 3.0,
+        availability: true,
+    },
+    {
+        name: "Muesli",
+        price: 1.5,
+        availability: true,
+    },
+    {
+        name: "Banana Slices",
+        price: 1.0,
+        availability: true,
+    },
+    {
+        name: "Strawberry Slices",
+        price: 1.5,
+        availability: true,
+    },
+    {
+        name: "Mango Cubes",
+        price: 2.0,
+        availability: true,
+    },
 ];
 
 // Function to ensure images directory exists
 const ensureImagesDirectory = () => {
-  const publicDir = path.join(__dirname, "../../public");
-  const imagesDir = path.join(publicDir, "images");
+    const publicDir = path.join(__dirname, "../../public");
+    const imagesDir = path.join(publicDir, "images");
 
-  // Create public directory if it doesn't exist
-  if (!fs.existsSync(publicDir)) {
-    fs.mkdirSync(publicDir);
-    Logger.info("Created public directory");
-  }
+    // Create public directory if it doesn't exist
+    if (!fs.existsSync(publicDir)) {
+        fs.mkdirSync(publicDir);
+        Logger.info("Created public directory");
+    }
 
-  // Create images directory if it doesn't exist
-  if (!fs.existsSync(imagesDir)) {
-    fs.mkdirSync(imagesDir);
-    Logger.info("Created images directory");
-  }
+    // Create images directory if it doesn't exist
+    if (!fs.existsSync(imagesDir)) {
+        fs.mkdirSync(imagesDir);
+        Logger.info("Created images directory");
+    }
 
-  return imagesDir;
+    return imagesDir;
 };
 
 // Function to check if images exist
 const validateImages = () => {
-  const imagesDir = ensureImagesDirectory();
+    const imagesDir = ensureImagesDirectory();
 
-  // Check if each image referenced in menuItems exists
-  const missingImages = [];
-  menuItems.forEach((item) => {
-    if (item.imageUrl) {
-      // Extract filename from imageUrl (remove /images/ prefix)
-      const filename = item.imageUrl.replace("/images/", "");
-      const imagePath = path.join(imagesDir, filename);
+    // Check if each image referenced in menuItems exists
+    const missingImages = [];
+    menuItems.forEach((item) => {
+        if (item.imageUrl) {
+            // Extract filename from imageUrl (remove /images/ prefix)
+            const filename = item.imageUrl.replace("/images/", "");
+            const imagePath = path.join(imagesDir, filename);
 
-      if (!fs.existsSync(imagePath)) {
-        missingImages.push({
-          item: item.name,
-          path: imagePath,
-        });
-      }
-    }
-  });
-
-  if (missingImages.length > 0) {
-    Logger.warn("Some images are missing:");
-    missingImages.forEach((img) => {
-      Logger.warn(`- ${img.item}: ${img.path}`);
+            if (!fs.existsSync(imagePath)) {
+                missingImages.push({
+                    item: item.name,
+                    path: imagePath,
+                });
+            }
+        }
     });
-  } else {
-    Logger.success("All images are available");
-  }
+
+    if (missingImages.length > 0) {
+        Logger.warn("Some images are missing:");
+        missingImages.forEach((img) => {
+            Logger.warn(`- ${img.item}: ${img.path}`);
+        });
+    } else {
+        Logger.success("All images are available");
+    }
 };
 
 // Function to seed the database
 async function seedDatabase() {
-  try {
-    await dbConnect();
-    Logger.info("Database Connected...");
+    try {
+        await dbConnect();
+        Logger.info("Database Connected...");
 
-    // Check if all referenced images exist
-    validateImages();
+        // Check if all referenced images exist
+        validateImages();
 
-    Logger.info("Seeding Users...");
-    const seededUsers = await Promise.all(
-      users.map((user) => createUser(user))
-    );
-    Logger.success("Users Seeded Successfully!");
-
-    Logger.info("Seeding Categories...");
-    const seededCategories = await Promise.all(
-      categories.map((category) => createCategory(category.name))
-    );
-    Logger.success("Categories Seeded Successfully!");
-
-    Logger.info("Seeding Toppings...");
-    const seededToppings = await Promise.all(
-      toppings.map((topping) =>
-        createTopping(topping.name, topping.price, topping.availability)
-      )
-    );
-    Logger.success("Toppings Seeded Successfully!");
-
-    Logger.info("Seeding Menu Items...");
-    const seededItems = await Promise.all(
-      menuItems.map((item) => {
-        const randomToppings = seededToppings
-          .sort(() => 0.5 - Math.random()) // Shuffle array
-          .slice(0, Math.floor(Math.random() * seededToppings.length) + 1);
-
-        return createMenuItem(
-          item.name,
-          item.description,
-          item.basePrice,
-          item.category,
-          item.toppings,
-          item.imageUrl || ""
+        Logger.info("Seeding Users...");
+        const seededUsers = await Promise.all(
+            users.map((user) => createUser(user))
         );
-      })
-    );
-    Logger.success("Menu Items Seeded Successfully!");
+        Logger.success("Users Seeded Successfully!");
+
+        Logger.info("Seeding Categories...");
+        const seededCategories = await Promise.all(
+            categories.map((category) => createCategory(category.name))
+        );
+        Logger.success("Categories Seeded Successfully!");
+
+        Logger.info("Seeding Toppings...");
+        const seededToppings = await Promise.all(
+            toppings.map((topping) =>
+                createTopping(topping.name, topping.price, topping.availability)
+            )
+        );
+        Logger.success("Toppings Seeded Successfully!");
+
+        Logger.info("Seeding Menu Items...");
+        const seededItems = await Promise.all(
+            menuItems.map((item) => {
+                const randomToppings = seededToppings
+                    .sort(() => 0.5 - Math.random()) // Shuffle array
+                    .slice(0, Math.floor(Math.random() * seededToppings.length) + 1);
+
+                return createMenuItem(
+                    item.name,
+                    item.description,
+                    item.basePrice,
+                    item.category,
+                    item.toppings,
+                    item.imageUrl || ""
+                );
+            })
+        );
+        Logger.success("Menu Items Seeded Successfully!");
 
         Logger.info("Seeding Orders...");
 
@@ -349,15 +349,15 @@ async function seedDatabase() {
         // Logger.info("Seeding Reviews...");
 
 
-    Logger.success("Seeding Completed Successfully!");
-  } catch (error) {
-    Logger.error("Error seeding database: " + error.message);
-    // Print full error details for debugging
-    console.error(error);
-  } finally {
-    await dbDisconnect();
-    Logger.info("Database Disconnected.");
-  }
+        Logger.success("Seeding Completed Successfully!");
+    } catch (error) {
+        Logger.error("Error seeding database: " + error.message);
+        // Print full error details for debugging
+        console.error(error);
+    } finally {
+        await dbDisconnect();
+        Logger.info("Database Disconnected.");
+    }
 }
 
 // Run the seed function
