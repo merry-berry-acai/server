@@ -90,17 +90,80 @@ async function getAllUsers() {
 
 async function updateUser(userId, updateData) {
   try {
+    // Validate userId
+    if (!userId) {
+      throw new ApiError(400, "User ID is required");
+    }
+
+    // Validate updateData
+    if (!updateData || Object.keys(updateData).length === 0) {
+      throw new ApiError(400, "No update data provided");
+    }
+
+    // Validate role if it's being updated
+    if (updateData.role && !["user", "admin"].includes(updateData.role)) {
+      throw new ApiError(400, "Role must be either 'user' or 'admin'");
+    }
+
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
-    }).populate("orderHistory");
+      runValidators: true, // Ensure validation runs on update
+    }).populate({
+      path: "orderHistory",
+      options: { sort: { createdAt: -1 } },
+      populate: [
+        {
+          path: "items.product",
+          select: "name basePrice category imageUrl",
+        },
+        {
+          path: "items.toppings",
+          select: "name price",
+        },
+      ],
+    });
 
-    if (!updatedUser)
-      throw new ApiError(404, "User not found or update failed");
+    if (!updatedUser) {
+      throw new ApiError(
+        404,
+        `User with ID ${userId} not found or update failed`
+      );
+    }
+
     return updatedUser;
   } catch (error) {
+    // Re-throw ApiError instances
     if (error instanceof ApiError) throw error;
+
+    // Handle MongoDB validation errors
+    if (error.name === "ValidationError") {
+      const validationError = new ApiError(
+        400,
+        `Validation error: ${Object.values(error.errors)
+          .map((err) => err.message)
+          .join(", ")}`
+      );
+      throw validationError;
+    }
+
+    // Handle invalid ObjectId format
+    if (error.name === "CastError") {
+      throw new ApiError(400, `Invalid user ID format: ${userId}`);
+    }
+
+    // Handle duplicate key error
+    if (error.code === 11000) {
+      throw new ApiError(
+        409,
+        `Update would create a duplicate ${Object.keys(error.keyValue)[0]}`
+      );
+    }
+
     console.error("Error updating user:", error);
-    throw new ApiError(500, "Failed to update user");
+    throw new ApiError(
+      500,
+      "Failed to update user: " + (error.message || "Unknown error")
+    );
   }
 }
 
