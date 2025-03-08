@@ -5,7 +5,9 @@ const { ApiError } = require('../utils/errorHandler');
  * @param {Array} requiredFields - Array of field names that are required
  */
 const validateRequiredFields = (requiredFields) => (req, res, next) => {
-    const missingFields = requiredFields.filter(field => !req.body[field]);
+    const missingFields = requiredFields.filter(field => {
+        return req.body[field] === undefined || req.body[field] === null || req.body[field] === '';
+    });
 
     if (missingFields.length > 0) {
         throw new ApiError(
