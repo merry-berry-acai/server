@@ -6,43 +6,19 @@ async function createMenuItem(
     name,
     description,
     basePrice,
-    categoryName,
-    toppingNames = [],
+    category,
+    toppings = [],
     imageUrl
 ) {
     try {
-        // Validate required fields
-        if (!name || !basePrice || !categoryName) {
-            const error = new Error(
-                "Missing required fields: name, basePrice, and category are required"
-            );
-            error.statusCode = 400;
-            throw error;
-        }
 
-        // Retrieve the category by name
-        const category = await Category.findOne({ name: categoryName });
-
-        if (!category) {
-            throw new Error(`Category '${categoryName}' not found.`);
-        }
-
-        // Retrieve the toppings by names
-        const toppings = await Topping.find({ name: { $in: toppingNames } }, "_id");
-
-        // Check if all requested toppings were found
-        if (toppings.length !== toppingNames.length) {
-            const foundToppingNames = toppings.map(t => t.name);
-            const missingToppings = toppingNames.filter(t => !foundToppingNames.includes(t));
-            throw new Error(`Toppings not found: ${missingToppings.join(", ")}`);
-        }
 
         const newMenuItem = new Item({
             name,
             description,
             basePrice,
-            category: category._id,
-            toppings: toppings.map(t => t._id),
+            category: category,
+            toppings: toppings,
             imageUrl,
         });
 

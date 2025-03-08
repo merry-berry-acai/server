@@ -20,6 +20,7 @@ const validateToppings = async (req, res, next) => {
         // Extract valid topping IDs
         req.toppingIds = foundToppings.map(topping => topping._id);
 
+
         // Check for missing toppings
         const foundToppingNames = foundToppings.map(t => t.name);
         const missingToppings = toppings.filter(name => !foundToppingNames.includes(name));

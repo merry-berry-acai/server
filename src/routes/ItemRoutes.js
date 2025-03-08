@@ -18,18 +18,18 @@ const { validateToppings } = require("../middlewares/validateToppings");
 // Create a new menu item passing the names of toppings and name of category
 router.post("/new",
     validateRequiredFields(['name', 'basePrice', 'category']),
-    //validateToppings,
-    //validateCategory,
+    validateToppings,
+    validateCategory,
     checkUserFirebaseUid,
     checkAdminRole,
     asyncHandler(async (req, res) => {
         // get the categopryIds from the middleware after validation
-        categoryIds = req.categoryId;
+        const categoryId = req.categoryId;
 
         // get the toppingsIds from the middleware after validation
         const toppingIds = req.toppingIds;
         const { name, description, basePrice, imageUrl } = req.body;
-        const newItem = await createMenuItem(name, description, basePrice, categoryIds, toppingIds, imageUrl);
+        const newItem = await createMenuItem(name, description, basePrice, categoryId, toppingIds, imageUrl);
 
         if (newItem.error) {
             return res.status(newItem.status || 400).json(newItem);
@@ -66,8 +66,8 @@ router.get("/home/featured",
 
 // Update a menu item by ID
 router.patch("/:id",
-    //validateCategory,
-    //validateToppings,
+    validateCategory,
+    validateToppings,
     checkUserFirebaseUid,
     checkAdminRole,
     asyncHandler(async (req, res, next) => {

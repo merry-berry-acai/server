@@ -19,6 +19,7 @@ const validateCategory = async (req, res, next) => {
     if (isValidObjectId) {
       // First try to find by ID
       resultCategory = await Category.findById(category);
+      console.log("CATEGORY:",resultCategory)
     }
 
     // If not found by ID or not a valid ObjectId, try to find by name
