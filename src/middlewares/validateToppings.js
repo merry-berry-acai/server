@@ -1,29 +1,48 @@
-const { Topping } = require("../models/ToppingModel"); // Ensure correct import
+const { Topping } = require("../models/ToppingModel");
+const mongoose = require("mongoose");
 
+/**
+ * Middleware to validate and retrieve topping IDs based on provided topping names or ObjectIds.
+ * Attaches the topping IDs to `req.toppingIds` if valid.
+ */
 const validateToppings = async (req, res, next) => {
     try {
         const { toppings } = req.body; // Extract toppings from request body
 
-        // If toppings are not provided, skip validation and continue
+        // If no toppings are provided, continue without validation
         if (!toppings) {
+            req.toppingIds = []; // Ensure req.toppingIds is always defined
             return next();
         }
 
         // Ensure toppings is an array
         if (!Array.isArray(toppings)) {
-            return res.status(400).json({ error: "Toppings must be an array of names." });
+            return res.status(400).json({ error: "Toppings must be an array of names or ObjectIds." });
         }
 
-        // Find toppings by their names
-        const foundToppings = await Topping.find({ name: { $in: toppings } }, "_id name").lean();
+        let foundToppings = [];
+        let missingToppings = [];
 
-        // Extract valid topping IDs
-        req.toppingIds = foundToppings.map(topping => topping._id);
+        for (const topping of toppings) {
+            let resultTopping = null;
+            const isValidObjectId = mongoose.Types.ObjectId.isValid(topping);
 
+            if (isValidObjectId) {
+                // First, try finding by ObjectId
+                resultTopping = await Topping.findById(topping);
+            }
 
-        // Check for missing toppings
-        const foundToppingNames = foundToppings.map(t => t.name);
-        const missingToppings = toppings.filter(name => !foundToppingNames.includes(name));
+            // If not found by ID or not a valid ObjectId, try to find by name
+            if (!resultTopping) {
+                resultTopping = await Topping.findOne({ name: topping });
+            }
+
+            if (resultTopping) {
+                foundToppings.push(resultTopping._id);
+            } else {
+                missingToppings.push(topping);
+            }
+        }
 
         if (missingToppings.length > 0) {
             console.error(`Toppings not found: ${missingToppings.join(", ")}`);
@@ -34,14 +53,20 @@ const validateToppings = async (req, res, next) => {
 
             return res.status(404).json({
                 error: `Some toppings were not found: ${missingToppings.join(", ")}`,
-                availableToppings: availableToppingNames || "No toppings available"
+                availableToppings: availableToppingNames || "No toppings available",
+                message: "Please provide valid topping names or IDs."
             });
         }
 
-        next(); // Move to the next middleware or route handler
+        // Attach valid topping IDs to request
+        req.toppingIds = foundToppings;
+        next(); // Proceed to next middleware
     } catch (error) {
         console.error("Error in validateToppings:", error.message);
-        return res.status(500).json({ error: "Internal server error: " + error.message });
+        return res.status(500).json({
+            error: "Internal server error while validating toppings",
+            details: error.message,
+        });
     }
 };
 

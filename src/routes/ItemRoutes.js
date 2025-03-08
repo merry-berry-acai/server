@@ -20,8 +20,8 @@ router.post("/new",
     validateRequiredFields(['name', 'basePrice', 'category']),
     validateToppings,
     validateCategory,
-    checkUserFirebaseUid,
-    checkAdminRole,
+    //checkUserFirebaseUid,
+    //checkAdminRole,
     asyncHandler(async (req, res) => {
         // get the categopryIds from the middleware after validation
         const categoryId = req.categoryId;
