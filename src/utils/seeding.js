@@ -51,7 +51,7 @@ const menuItems = [
         imageUrl: "/images/berry-blast-smoothie.jpeg",
         basePrice: 7.5,
         //toppings: ["Fresh Berries", "Honey Drizzle", "Chia Seeds"],
-        //category: "smoothies",
+        category: "smoothies",
         availability: true,
     },
     {
@@ -61,7 +61,7 @@ const menuItems = [
         imageUrl: "/images/tropical-green-smoothie.jpeg",
         basePrice: 8.0,
         //toppings: ["Granola", "Coconut Flakes"],
-        //category: "smoothies",
+        category: "smoothies",
         availability: true,
     },
     {
@@ -71,7 +71,7 @@ const menuItems = [
         imageUrl: "/images/choc-peanut-smoothie.jpeg",
         basePrice: 8.5,
         //toppings: ["Almond Butter", "Protein Powder (Whey)"],
-        //category: "smoothies",
+        category: "smoothies",
         availability: true,
     },
     {
@@ -80,8 +80,8 @@ const menuItems = [
             "Organic Acai blended with banana, topped with granola and honey.",
         imageUrl: "/images/classic-acai-bowl.jpeg",
         basePrice: 9.99,
-        //toppings: ["Honey Drizzle", "Granola"],
-        //category: "acai bowls",
+        toppings: ["Honey Drizzle", "Granola"],
+        category: "acai bowls",
         availability: true,
     },
     {
@@ -90,8 +90,8 @@ const menuItems = [
             "Acai blended with mango and coconut water, topped with fresh mango, coconut flakes, and chia seeds.",
         imageUrl: "/images/tropical-acai-bowl.jpeg",
         basePrice: 11.5,
-        //toppings: ["Mango Cubes", "Coconut Flakes", "Chia Seeds"],
-        //category: "acai bowls",
+        toppings: ["Mango Cubes", "Coconut Flakes", "Chia Seeds"],
+        category: "acai bowls",
         availability: true,
     },
     {
@@ -100,8 +100,8 @@ const menuItems = [
             "Acai with mixed berries, topped with almond butter, granola, and fresh berries.",
         imageUrl: "/images/berry-nut-acai-bowl.jpeg",
         basePrice: 12.0,
-        //toppings: ["Almond Butter", "Granola", "Fresh Berries"],
-        //category: "acai bowls",
+        toppings: ["Almond Butter", "Granola", "Fresh Berries"],
+        category: "acai bowls",
         availability: true,
     },
     {
@@ -110,8 +110,8 @@ const menuItems = [
             "Homemade energy bites with oats, peanut butter, and protein powder.",
         imageUrl: "/images/protein-bites.jpeg",
         basePrice: 4.5,
-        //toppings: [],
-        //category: "snacks",
+        toppings: [],
+        category: "snacks",
         availability: true,
     },
     {
@@ -120,7 +120,7 @@ const menuItems = [
         imageUrl: "/images/fruit-salad.jpeg",
         basePrice: 5.0,
         //toppings: [],
-        //category: "snacks",
+        category: "snacks",
         availability: true,
     },
     {
@@ -128,8 +128,8 @@ const menuItems = [
         description: "Kale, green apple, ginger, lemon, and banana.",
         imageUrl: "/images/green-power-smoothie.jpeg",
         basePrice: 7.0,
-        //toppings: ["Banana Slices", "Chia Seeds"],
-        //category: "smoothies",
+        toppings: ["Banana Slices", "Chia Seeds"],
+        category: "smoothies",
         availability: true,
     },
     {
@@ -138,8 +138,8 @@ const menuItems = [
             "Acai blended with mango, banana, and orange juice, topped with mango, strawberry, and muesli.",
         imageUrl: "/images/mango-tango-bowl.jpeg",
         basePrice: 12.5,
-        //toppings: ["Mango Cubes", "Strawberry Slices", "Muesli"],
-        //category: "acai bowls",
+        toppings: ["Mango Cubes", "Strawberry Slices", "Muesli"],
+        category: "acai bowls",
         availability: true,
     },
 ];
@@ -312,41 +312,6 @@ async function seedDatabase() {
         // Assign hardcoded users to specific orders
         const user1 = seededUsers[0]; // Danilo
         const user2 = seededUsers[2]; // Joel
-
-        // Use displayName instead of name property
-        // Logger.info(`Creating Order for ${user1.displayName}`);
-        // const order1 = await createOrder(user1._id, [
-        //     {
-        //         product: seededItems[0]._id,
-        //         quantity: 2,
-        //         toppings: [seededToppings[1]._id]
-        //     },
-        //     {
-        //         product: seededItems[1]._id,
-        //         quantity: 1,
-        //         toppings: [seededToppings[1]._id, seededToppings[2]._id]
-        //     }
-        // ], "No sugar added");
-
-        // // Use displayName instead of name property
-        // Logger.info(`Creating Order for ${user2.displayName}`);
-        // const order2 = await createOrder(user2._id, [
-        //     {
-        //         product: seededItems[2]._id,
-        //         quantity: 4,
-        //     },
-        //     {
-        //         product: seededItems[3]._id,
-        //         quantity: 2,
-        //         toppings: [seededToppings[1]._id, seededToppings[3]._id]
-        //     }
-        // ], "Less ice, please");
-
-        // // Use displayName instead of name property
-        // Logger.success(`Order Created for ${user1.displayName}`);
-        // Logger.success(`Order Created for ${user2.displayName}`);
-
-        // Logger.info("Seeding Reviews...");
 
 
         Logger.success("Seeding Completed Successfully!");
