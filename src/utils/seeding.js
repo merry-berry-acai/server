@@ -1,9 +1,9 @@
 const { dbConnect, dbDisconnect } = require("./database");
 const { createMenuItem } = require("../controllers/menuItemController");
 const { createOrder } = require("../controllers/orderController");
-const { createTopping } = require("../controllers/toppingController");
+const { createTopping, getAllToppings } = require("../controllers/toppingController");
 const { createUser } = require("../controllers/userController");
-const { createCategory } = require("../controllers/categoryController");
+const { createCategory, getAllCategories } = require("../controllers/categoryController");
 const Logger = require("./logger");
 const path = require("path");
 const fs = require("fs");
@@ -51,7 +51,7 @@ const menuItems = [
         imageUrl: "/images/berry-blast-smoothie.jpeg",
         basePrice: 7.5,
         //toppings: ["Fresh Berries", "Honey Drizzle", "Chia Seeds"],
-        category: "smoothies",
+        //category: "smoothies",
         availability: true,
     },
     {
@@ -61,7 +61,7 @@ const menuItems = [
         imageUrl: "/images/tropical-green-smoothie.jpeg",
         basePrice: 8.0,
         //toppings: ["Granola", "Coconut Flakes"],
-        category: "smoothies",
+        //category: "smoothies",
         availability: true,
     },
     {
@@ -71,7 +71,7 @@ const menuItems = [
         imageUrl: "/images/choc-peanut-smoothie.jpeg",
         basePrice: 8.5,
         //toppings: ["Almond Butter", "Protein Powder (Whey)"],
-        category: "smoothies",
+        //category: "smoothies",
         availability: true,
     },
     {
@@ -80,8 +80,8 @@ const menuItems = [
             "Organic Acai blended with banana, topped with granola and honey.",
         imageUrl: "/images/classic-acai-bowl.jpeg",
         basePrice: 9.99,
-        toppings: ["Honey Drizzle", "Granola"],
-        category: "acai bowls",
+        //toppings: ["Honey Drizzle", "Granola"],
+        //category: "acai bowls",
         availability: true,
     },
     {
@@ -90,8 +90,8 @@ const menuItems = [
             "Acai blended with mango and coconut water, topped with fresh mango, coconut flakes, and chia seeds.",
         imageUrl: "/images/tropical-acai-bowl.jpeg",
         basePrice: 11.5,
-        toppings: ["Mango Cubes", "Coconut Flakes", "Chia Seeds"],
-        category: "acai bowls",
+        //toppings: ["Mango Cubes", "Coconut Flakes", "Chia Seeds"],
+        //category: "acai bowls",
         availability: true,
     },
     {
@@ -100,8 +100,8 @@ const menuItems = [
             "Acai with mixed berries, topped with almond butter, granola, and fresh berries.",
         imageUrl: "/images/berry-nut-acai-bowl.jpeg",
         basePrice: 12.0,
-        toppings: ["Almond Butter", "Granola", "Fresh Berries"],
-        category: "acai bowls",
+        //toppings: ["Almond Butter", "Granola", "Fresh Berries"],
+        //category: "acai bowls",
         availability: true,
     },
     {
@@ -110,8 +110,8 @@ const menuItems = [
             "Homemade energy bites with oats, peanut butter, and protein powder.",
         imageUrl: "/images/protein-bites.jpeg",
         basePrice: 4.5,
-        toppings: [],
-        category: "snacks",
+        //toppings: [],
+        //category: "snacks",
         availability: true,
     },
     {
@@ -120,7 +120,7 @@ const menuItems = [
         imageUrl: "/images/fruit-salad.jpeg",
         basePrice: 5.0,
         //toppings: [],
-        category: "snacks",
+        //category: "snacks",
         availability: true,
     },
     {
@@ -128,8 +128,8 @@ const menuItems = [
         description: "Kale, green apple, ginger, lemon, and banana.",
         imageUrl: "/images/green-power-smoothie.jpeg",
         basePrice: 7.0,
-        toppings: ["Banana Slices", "Chia Seeds"],
-        category: "smoothies",
+        //toppings: ["Banana Slices", "Chia Seeds"],
+        //category: "smoothies",
         availability: true,
     },
     {
@@ -138,8 +138,8 @@ const menuItems = [
             "Acai blended with mango, banana, and orange juice, topped with mango, strawberry, and muesli.",
         imageUrl: "/images/mango-tango-bowl.jpeg",
         basePrice: 12.5,
-        toppings: ["Mango Cubes", "Strawberry Slices", "Muesli"],
-        category: "acai bowls",
+        //toppings: ["Mango Cubes", "Strawberry Slices", "Muesli"],
+        //category: "acai bowls",
         availability: true,
     },
 ];
@@ -289,23 +289,33 @@ async function seedDatabase() {
         Logger.success("Toppings Seeded Successfully!");
 
         Logger.info("Seeding Menu Items...");
+
+        // Retrieve categories and toppings after insertion
+        const arrayCategories = await getAllCategories();
+        const categoryIds = arrayCategories.map(category => ({ _id: category._id, name: category.name }));
+
+        const arrayToppings = await getAllToppings();
+        const toppingsIds = arrayToppings.map(topping => ({ _id: topping._id, name: topping.name }));
+
         const seededItems = await Promise.all(
             menuItems.map((item) => {
-                const randomToppings = seededToppings
-                    .sort(() => 0.5 - Math.random()) // Shuffle array
-                    .slice(0, Math.floor(Math.random() * seededToppings.length) + 1);
+                const randomToppings = toppingsIds
+                    .sort(() => 0.5 - Math.random()) // Shuffle toppings
+                    .slice(0, Math.floor(Math.random() * toppingsIds.length) + 1) // Randomly select toppings
+                    .map(t => t._id); // Extract only the ObjectId
 
                 return createMenuItem(
                     item.name,
                     item.description,
                     item.basePrice,
-                    item.category,
-                    item.toppings,
+                    categoryIds[Math.floor(Math.random() * categoryIds.length)]._id, //Selects a random category ID
+                    randomToppings, // Pass only topping IDs
                     item.imageUrl || ""
                 );
             })
         );
         Logger.success("Menu Items Seeded Successfully!");
+
 
         Logger.info("Seeding Orders...");
 
