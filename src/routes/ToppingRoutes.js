@@ -50,7 +50,7 @@ router.get("/",
 /**
  * Update a topping by ID
  */
-router.patch("/:id",
+router.put("/:id",
     checkUserFirebaseUid,
     checkAdminRole,
     asyncHandler(async (req, res) => {
