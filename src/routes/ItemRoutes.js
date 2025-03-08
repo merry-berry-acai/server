@@ -12,22 +12,24 @@ const {
 } = require("../controllers/menuItemController");
 const { checkUserFirebaseUid } = require("../middlewares/checkUser");
 const { checkAdminRole } = require("../middlewares/checkAdminRole");
-const { ConnectionCheckOutStartedEvent } = require("mongodb");
+const { validateCategory } = require("../middlewares/validateItemCategory");
+const { validateToppings } = require("../middlewares/validateToppings");
 
 // Create a new menu item passing the names of toppings and name of category
 router.post("/new",
     validateRequiredFields(['name', 'basePrice', 'category']),
     //validateToppings,
     //validateCategory,
-    //checkUserFirebaseUid,
-    //checkAdminRole,
+    checkUserFirebaseUid,
+    checkAdminRole,
     asyncHandler(async (req, res) => {
-        
-        const category = req.body.category;
-        const toppings = req.body.toppings;
-        
+        // get the categopryIds from the middleware after validation
+        categoryIds = req.categoryId;
+
+        // get the toppingsIds from the middleware after validation
+        const toppingIds = req.toppingIds;
         const { name, description, basePrice, imageUrl } = req.body;
-        const newItem = await createMenuItem(name, description, basePrice, category, toppings, imageUrl);
+        const newItem = await createMenuItem(name, description, basePrice, categoryIds, toppingIds, imageUrl);
 
         if (newItem.error) {
             return res.status(newItem.status || 400).json(newItem);
@@ -66,8 +68,8 @@ router.get("/home/featured",
 router.patch("/:id",
     //validateCategory,
     //validateToppings,
-    //checkUserFirebaseUid,
-    //checkAdminRole,
+    checkUserFirebaseUid,
+    checkAdminRole,
     asyncHandler(async (req, res, next) => {
         try {
             const { id } = req.params;

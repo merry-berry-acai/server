@@ -1,27 +1,48 @@
 const { Item } = require("../models/MenuItemModel");
-const { validateCategory, validateToppings } = require("../utils/validationToppingsCategories");
-
+const { Category } = require("../models/CategoryModel");
+const { Topping } = require("../models/ToppingModel");
 
 async function createMenuItem(
     name,
     description,
     basePrice,
-    category,
-    toppings = [],
+    categoryName,
+    toppingNames = [],
     imageUrl
 ) {
     try {
+        // Validate required fields
+        if (!name || !basePrice || !categoryName) {
+            const error = new Error(
+                "Missing required fields: name, basePrice, and category are required"
+            );
+            error.statusCode = 400;
+            throw error;
+        }
 
-        // Validate category and toppings
-        const categoryId = await validateCategory(category);
-        const toppingIds = await validateToppings(toppings);
+        // Retrieve the category by name
+        const category = await Category.findOne({ name: categoryName });
+
+        if (!category) {
+            throw new Error(`Category '${categoryName}' not found.`);
+        }
+
+        // Retrieve the toppings by names
+        const toppings = await Topping.find({ name: { $in: toppingNames } }, "_id");
+
+        // Check if all requested toppings were found
+        if (toppings.length !== toppingNames.length) {
+            const foundToppingNames = toppings.map(t => t.name);
+            const missingToppings = toppingNames.filter(t => !foundToppingNames.includes(t));
+            throw new Error(`Toppings not found: ${missingToppings.join(", ")}`);
+        }
 
         const newMenuItem = new Item({
             name,
             description,
             basePrice,
-            category: categoryId,
-            toppings: toppingIds.map(t => t._id),
+            category: category._id,
+            toppings: toppings.map(t => t._id),
             imageUrl,
         });
 
@@ -144,7 +165,6 @@ async function updateMenuItem(menuItemId, updateData) {
             error.statusCode = 400;
             throw error;
         }
-        
 
         const updatedMenuItem = await Item.findByIdAndUpdate(
             menuItemId,
