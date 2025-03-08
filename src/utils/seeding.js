@@ -274,65 +274,112 @@ async function seedDatabase() {
         );
         Logger.success("Users Seeded Successfully!");
 
-        Logger.info("Seeding Categories...");
-        const seededCategories = await Promise.all(
-            categories.map((category) => createCategory(category.name))
+    Logger.info("Seeding Categories...");
+    const seededCategories = await Promise.all(
+      categories.map((category) => createCategory(category.name))
+    );
+    Logger.success("Categories Seeded Successfully!");
+
+    // Create a map of category names to category IDs for easy lookup
+    const categoryMap = {};
+    seededCategories.forEach((category) => {
+      categoryMap[category.name.toLowerCase()] = category._id;
+    });
+
+    Logger.info("Seeding Toppings...");
+    const seededToppings = await Promise.all(
+      toppings.map((topping) =>
+        createTopping(topping.name, topping.price, topping.availability)
+      )
+    );
+    Logger.success("Toppings Seeded Successfully!");
+
+    // Create a map of topping names to topping IDs for easy lookup
+    const toppingMap = {};
+    seededToppings.forEach((topping) => {
+      toppingMap[topping.name] = topping._id;
+    });
+
+    Logger.info("Seeding Menu Items...");
+    const seededItems = await Promise.all(
+      menuItems.map((item) => {
+        // Convert category name to category ID
+        const categoryId = categoryMap[item.category.toLowerCase()];
+        if (!categoryId) {
+          throw new Error(`Category not found: ${item.category}`);
+        }
+
+        // Convert topping names to topping IDs
+        const toppingIds = item.toppings.map((toppingName) => {
+          const toppingId = toppingMap[toppingName];
+          if (!toppingId) {
+            throw new Error(`Topping not found: ${toppingName}`);
+          }
+          return toppingId;
+        });
+
+        return createMenuItem(
+          item.name,
+          item.description,
+          item.basePrice,
+          categoryId, // Use the category ID instead of name
+          toppingIds, // Use the topping IDs instead of names
+          item.imageUrl || ""
         );
-        Logger.success("Categories Seeded Successfully!");
+      })
+    );
+    Logger.success("Menu Items Seeded Successfully!");
 
-        Logger.info("Seeding Toppings...");
-        const seededToppings = await Promise.all(
-            toppings.map((topping) =>
-                createTopping(topping.name, topping.price, topping.availability)
-            )
-        );
-        Logger.success("Toppings Seeded Successfully!");
+    Logger.info("Seeding Orders...");
 
-        Logger.info("Seeding Menu Items...");
+    // Assign hardcoded users to specific orders
+    const user1 = seededUsers[0]; // Danilo
+    const user2 = seededUsers[2]; // Joel
 
-        // Retrieve categories and toppings after insertion
-        const arrayCategories = await getAllCategories();
-        const categoryIds = arrayCategories.map(category => ({ _id: category._id, name: category.name }));
+    // Use displayName instead of name property
+    // Logger.info(`Creating Order for ${user1.displayName}`);
+    // const order1 = await createOrder(user1._id, [
+    //     {
+    //         product: seededItems[0]._id,
+    //         quantity: 2,
+    //         toppings: [seededToppings[1]._id]
+    //     },
+    //     {
+    //         product: seededItems[1]._id,
+    //         quantity: 1,
+    //         toppings: [seededToppings[1]._id, seededToppings[2]._id]
+    //     }
+    // ], "No sugar added");
 
-        const arrayToppings = await getAllToppings();
-        const toppingsIds = arrayToppings.map(topping => ({ _id: topping._id, name: topping.name }));
+    // // Use displayName instead of name property
+    // Logger.info(`Creating Order for ${user2.displayName}`);
+    // const order2 = await createOrder(user2._id, [
+    //     {
+    //         product: seededItems[2]._id,
+    //         quantity: 4,
+    //     },
+    //     {
+    //         product: seededItems[3]._id,
+    //         quantity: 2,
+    //         toppings: [seededToppings[1]._id, seededToppings[3]._id]
+    //     }
+    // ], "Less ice, please");
 
-        const seededItems = await Promise.all(
-            menuItems.map((item) => {
-                const randomToppings = toppingsIds
-                    .sort(() => 0.5 - Math.random()) // Shuffle toppings
-                    .slice(0, Math.floor(Math.random() * toppingsIds.length) + 1) // Randomly select toppings
-                    .map(t => t._id); // Extract only the ObjectId
+    // // Use displayName instead of name property
+    // Logger.success(`Order Created for ${user1.displayName}`);
+    // Logger.success(`Order Created for ${user2.displayName}`);
 
-                return createMenuItem(
-                    item.name,
-                    item.description,
-                    item.basePrice,
-                    categoryIds[Math.floor(Math.random() * categoryIds.length)]._id, //Selects a random category ID
-                    randomToppings, // Pass only topping IDs
-                    item.imageUrl || ""
-                );
-            })
-        );
-        Logger.success("Menu Items Seeded Successfully!");
+    // Logger.info("Seeding Reviews...");
 
-
-        Logger.info("Seeding Orders...");
-
-        // Assign hardcoded users to specific orders
-        const user1 = seededUsers[0]; // Danilo
-        const user2 = seededUsers[2]; // Joel
-
-
-        Logger.success("Seeding Completed Successfully!");
-    } catch (error) {
-        Logger.error("Error seeding database: " + error.message);
-        // Print full error details for debugging
-        console.error(error);
-    } finally {
-        await dbDisconnect();
-        Logger.info("Database Disconnected.");
-    }
+    Logger.success("Seeding Completed Successfully!");
+  } catch (error) {
+    Logger.error("Error seeding database: " + error.message);
+    // Print full error details for debugging
+    console.error(error);
+  } finally {
+    await dbDisconnect();
+    Logger.info("Database Disconnected.");
+  }
 }
 
 // Run the seed function
