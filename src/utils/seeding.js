@@ -280,6 +280,12 @@ async function seedDatabase() {
     );
     Logger.success("Categories Seeded Successfully!");
 
+    // Create a map of category names to category IDs for easy lookup
+    const categoryMap = {};
+    seededCategories.forEach((category) => {
+      categoryMap[category.name.toLowerCase()] = category._id;
+    });
+
     Logger.info("Seeding Toppings...");
     const seededToppings = await Promise.all(
       toppings.map((topping) =>
@@ -288,66 +294,82 @@ async function seedDatabase() {
     );
     Logger.success("Toppings Seeded Successfully!");
 
+    // Create a map of topping names to topping IDs for easy lookup
+    const toppingMap = {};
+    seededToppings.forEach((topping) => {
+      toppingMap[topping.name] = topping._id;
+    });
+
     Logger.info("Seeding Menu Items...");
     const seededItems = await Promise.all(
       menuItems.map((item) => {
-        const randomToppings = seededToppings
-          .sort(() => 0.5 - Math.random()) // Shuffle array
-          .slice(0, Math.floor(Math.random() * seededToppings.length) + 1);
+        // Convert category name to category ID
+        const categoryId = categoryMap[item.category.toLowerCase()];
+        if (!categoryId) {
+          throw new Error(`Category not found: ${item.category}`);
+        }
+
+        // Convert topping names to topping IDs
+        const toppingIds = item.toppings.map((toppingName) => {
+          const toppingId = toppingMap[toppingName];
+          if (!toppingId) {
+            throw new Error(`Topping not found: ${toppingName}`);
+          }
+          return toppingId;
+        });
 
         return createMenuItem(
           item.name,
           item.description,
           item.basePrice,
-          item.category,
-          item.toppings,
+          categoryId, // Use the category ID instead of name
+          toppingIds, // Use the topping IDs instead of names
           item.imageUrl || ""
         );
       })
     );
     Logger.success("Menu Items Seeded Successfully!");
 
-        Logger.info("Seeding Orders...");
+    Logger.info("Seeding Orders...");
 
-        // Assign hardcoded users to specific orders
-        const user1 = seededUsers[0]; // Danilo
-        const user2 = seededUsers[2]; // Joel
+    // Assign hardcoded users to specific orders
+    const user1 = seededUsers[0]; // Danilo
+    const user2 = seededUsers[2]; // Joel
 
-        // Use displayName instead of name property
-        // Logger.info(`Creating Order for ${user1.displayName}`);
-        // const order1 = await createOrder(user1._id, [
-        //     {
-        //         product: seededItems[0]._id,
-        //         quantity: 2,
-        //         toppings: [seededToppings[1]._id]
-        //     },
-        //     {
-        //         product: seededItems[1]._id,
-        //         quantity: 1,
-        //         toppings: [seededToppings[1]._id, seededToppings[2]._id]
-        //     }
-        // ], "No sugar added");
+    // Use displayName instead of name property
+    // Logger.info(`Creating Order for ${user1.displayName}`);
+    // const order1 = await createOrder(user1._id, [
+    //     {
+    //         product: seededItems[0]._id,
+    //         quantity: 2,
+    //         toppings: [seededToppings[1]._id]
+    //     },
+    //     {
+    //         product: seededItems[1]._id,
+    //         quantity: 1,
+    //         toppings: [seededToppings[1]._id, seededToppings[2]._id]
+    //     }
+    // ], "No sugar added");
 
-        // // Use displayName instead of name property
-        // Logger.info(`Creating Order for ${user2.displayName}`);
-        // const order2 = await createOrder(user2._id, [
-        //     {
-        //         product: seededItems[2]._id,
-        //         quantity: 4,
-        //     },
-        //     {
-        //         product: seededItems[3]._id,
-        //         quantity: 2,
-        //         toppings: [seededToppings[1]._id, seededToppings[3]._id]
-        //     }
-        // ], "Less ice, please");
+    // // Use displayName instead of name property
+    // Logger.info(`Creating Order for ${user2.displayName}`);
+    // const order2 = await createOrder(user2._id, [
+    //     {
+    //         product: seededItems[2]._id,
+    //         quantity: 4,
+    //     },
+    //     {
+    //         product: seededItems[3]._id,
+    //         quantity: 2,
+    //         toppings: [seededToppings[1]._id, seededToppings[3]._id]
+    //     }
+    // ], "Less ice, please");
 
-        // // Use displayName instead of name property
-        // Logger.success(`Order Created for ${user1.displayName}`);
-        // Logger.success(`Order Created for ${user2.displayName}`);
+    // // Use displayName instead of name property
+    // Logger.success(`Order Created for ${user1.displayName}`);
+    // Logger.success(`Order Created for ${user2.displayName}`);
 
-        // Logger.info("Seeding Reviews...");
-
+    // Logger.info("Seeding Reviews...");
 
     Logger.success("Seeding Completed Successfully!");
   } catch (error) {
