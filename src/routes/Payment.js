@@ -14,6 +14,8 @@ const { storeSuccessfulPayment } = require("../controllers/paymentController");
 // Route to create a payment intent
 router.post("/payment", async (req, res) => {
   try {
+    console.log("Payment route hit, amount:", req.body.amount); // Log request start
+
     // Check if Stripe is enabled
     if (!isStripeEnabled()) {
       Logger.warn("Payment attempt when Stripe is disabled");
@@ -39,20 +41,24 @@ router.post("/payment", async (req, res) => {
       payment_method_types: [paymentMethodType],
     });
 
+    console.log("Payment intent object:", paymentIntent); // Log paymentIntent object
+
     Logger.info(`Payment intent created: ${paymentIntent.id}`, {
       amount,
       currency,
       paymentMethodType,
     });
 
+    const successResponse = { clientSecret: paymentIntent.client_secret };
+    console.log("Success response body:", successResponse); // Log success response body
+
     return sendSuccess(
       res,
-      {
-        clientSecret: paymentIntent.client_secret,
-      },
+      successResponse,
       "Payment intent created"
     );
   } catch (error) {
+    console.error("Error in /payment route:", error); // More specific error log
     if (error instanceof StripeServiceError) {
       return sendError(res, error.message, 503, null, error.code);
     }
