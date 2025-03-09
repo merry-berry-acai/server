@@ -7,28 +7,20 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "drop": "node src/utils/dropping.js",
-    "seed": "node src/utils/seeding.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "seed": "node src/utils/seeding.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sentry/node": "^9.5.0",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.13.0",
     "mongoose": "^8.9.6",
     "multer": "^1.4.5-lts.1",
-    "stripe": "^17.7.0",
-    "uuid": "^11.1.0"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0",
-    "supertest": "^7.0.0"
+    "stripe": "^17.7.0"
   }
 }
