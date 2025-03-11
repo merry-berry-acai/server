@@ -9,7 +9,7 @@ const { sendSuccess } = require('../utils/responseHandler');
 
 // Define the path to the images directory
 // Assuming images are stored in a directory called 'images' at the project root
-const imagesPath = path.join(process.cwd(), 'images');
+const imagesPath = path.join(process.cwd(), 'public/images');
 
 // Ensure the images directory exists
 if (!fs.existsSync(imagesPath)) {
