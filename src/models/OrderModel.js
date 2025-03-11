@@ -26,12 +26,7 @@ const OrderItemSchema = new Schema({
                 min: 1,
             },
         },
-    ],
-    specialInstructions: {
-        type: String,
-        default: "",
-        trim: true,
-    },
+    ]
 });
 
 const OrderSchema = new Schema(
@@ -51,7 +46,13 @@ const OrderSchema = new Schema(
             enum: ["pending", "processing", "paid", "cancelled"],
             default: "pending",
         },
+        specialInstructions: {
+            type: String,
+            default: "",
+            trim: true,
+        }
     },
+
     {
         timestamps: true, // Add createdAt and updatedAt fields
     }
