@@ -73,14 +73,12 @@ router.post("/payment", async (req, res) => {
     }
 });
 
-router.post("/payment/store", async (req, res) => {
+router.post("/payment/store", 
+    validateRequiredFields(["paymentIntent"]), 
+    async (req, res) => {
     try {
         let { paymentIntent, orderId } = req.body;
 
-        if (!paymentIntent || !paymentIntent.id) {
-            console.error("Payment intent data is required");
-            return res.status(400).json({ error: "Payment intent data is required" });
-        }
 
         const response = await storeSuccessfulPayment(paymentIntent, orderId);
 
