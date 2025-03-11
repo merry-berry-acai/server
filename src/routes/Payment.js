@@ -7,7 +7,6 @@ const {
     createPaymentIntent,
     StripeServiceError,
 } = require("../services/stripeService");
-const { asyncHandler } = require("../utils/errorHandler");
 const { validateRequiredFields } = require("../middlewares/validate");
 const { storeSuccessfulPayment } = require("../controllers/paymentController");
 
