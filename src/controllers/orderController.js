@@ -52,6 +52,7 @@ async function createOrder(
             user: userId,
             items,
             totalPrice: finalPrice,
+            status: "processing",  // Set the status to "processing" when creating the order
             specialInstructions: specialInstructions || "",
         });
 

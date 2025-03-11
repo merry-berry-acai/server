@@ -23,12 +23,13 @@ const OrderItemSchema = new Schema({
             quantity: {
                 type: Number,
                 default: 1,
-                min: 1, 
+                min: 1,
             },
         },
     ],
-    notes: {
+    specialInstructions: {
         type: String,
+        default: "",
         trim: true,
     },
 });
@@ -47,7 +48,7 @@ const OrderSchema = new Schema(
         },
         status: {
             type: String,
-            enum: ["pending", "processing", "completed", "cancelled"],
+            enum: ["pending", "processing", "paid", "cancelled"],
             default: "pending",
         },
     },

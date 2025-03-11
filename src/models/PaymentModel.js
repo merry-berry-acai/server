@@ -3,8 +3,6 @@ const mongoose = require("mongoose");
 const PaymentSchema = new mongoose.Schema({
     orderId: {
         type: mongoose.Schema.Types.ObjectId,
-        
-        //type: String, // Change from ObjectId to String temporarily
 
         ref: "Order",
         required: true

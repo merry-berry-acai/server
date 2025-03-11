@@ -28,7 +28,20 @@ async function storeSuccessfulPayment(paymentIntent, orderId) {
         // Save payment record to the database
         await newPayment.save();
 
-        return { status: 201, 
+        // Prepare the new order status based on the payment intent status
+        const newStatus = paymentIntent.status === "succeeded" ? "paid" : "cancelled";
+
+        // Update the order status using findByIdAndUpdate
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            { status: newStatus },
+            { new: true }
+        );
+
+        Logger.info(`Order ${orderId} updated to ${updatedOrder.status}`);
+
+        return { 
+            status: 201, 
             success: true, 
             message: "Payment stored successfully" };
 
