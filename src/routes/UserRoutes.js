@@ -70,7 +70,6 @@ router.get(
     checkUserFirebaseUid,
     checkAdminRole,
     asyncHandler(async (req, res) => {
-        console.log("all good");
         const users = await getAllUsers();
         sendSuccess(res, users);
     })

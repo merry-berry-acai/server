@@ -51,6 +51,8 @@ router.post("/payment", async (req, res) => {
         const successResponse = { clientSecret: paymentIntent.client_secret };
         console.log("Success response body:", successResponse); // Log success response body
 
+        console.log("PAYMENT INTENT:", paymentIntent);
+
         return sendSuccess(
             res,
             successResponse,
@@ -83,6 +85,11 @@ router.post("/payment/store",
         const response = await storeSuccessfulPayment(paymentIntent, orderId);
 
         console.log(response.message);
+        // If response status is not defined, handle error
+        if (!response.status) {
+            console.error("Missing status code in the response:", response);
+            return res.status(500).json({ error: "Internal server error" });
+        }
         res.status(response.status).json(response);
     } catch (error) {
         console.error("Error storing payment:", error);
