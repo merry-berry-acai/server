@@ -1,134 +1,107 @@
-const { Order } = require("../models/OrderModel");
-const { Item } = require("../models/MenuItemModel");
-const { Topping } = require("../models/ToppingModel");
-const mongoose = require("mongoose");
+const Order = require("../models/OrderModel");
 const { User } = require("../models/UserModel");
 
-
-//Calculate the order's total price 
-// summing topping and item prices
-
-async function totalPrice(items) {
-    let totalPrice = 0;
-    let orderToppingTotal = 0; // Stores total toppings price for the whole order
-    let orderProductsTotal = 0;
-
-    try {
-
-        // Extract all topping IDs from items
-        const toppingIds = items.flatMap(item => item.toppings).filter(id => id);
-        let toppingDetails = [];
-
-        if (toppingIds.length > 0) {
-            // Fetch toppings from the database
-            toppingDetails = await Topping.find({ _id: { $in: toppingIds } }, "_id name price");
-        }
-
-        // Iterate through items and retrieve each topping price
-        items.forEach(item => {
-            if (!Array.isArray(item.toppings)) {
-                item.toppings = []; // Ensure toppings is always an array
-            }
-
-            item.toppings = item.toppings.map(toppingId => {
-                const topping = toppingDetails.find(t => t._id.equals(toppingId));
-                if (topping) {
-                    console.log(`Topping ID: ${topping._id}, Name: ${topping.name}, Price: $${topping.price}`);
-                    orderToppingTotal += (topping.price * item.quantity); // Add to total toppings price
-                    return { _id: topping._id, name: topping.name, price: topping.price };
-                }
-                return null;
-            }).filter(t => t !== null);
-        });
-
-        console.log("Total Toppings Price for this order: $", orderToppingTotal);
-    } catch (error) {
-        console.error("Error retrieving topping prices:", error);
-        throw new Error("Internal server error");
-    }
-
-    //RETRIEVING PRODUCTS IDS
-    try {
-
-        let productDetails = [];
-        const productsIds = items
-            .flatMap(item => item.product)
-            .filter(id => id);
-
-        if (productsIds.length > 0) {
-            productDetails = await Item.find({ _id: { $in: productsIds } }, "_id name basePrice");
-        }
-
-        // Iterate through items and retrieve each product price
-        await Promise.all(items.map(async (item) => {
-            try {
-                // Ensure item.product is a valid ObjectId
-                if (mongoose.Types.ObjectId.isValid(item.product)) {
-                    // Fetch product details asynchronously
-                    const product = await Item.findById(item.product);
-
-                    if (product) {
-                        // Calculate total price for the product
-                        const productTotal = product.basePrice * item.quantity;
-
-                        // Log the price of each product (product's base price and total)
-                        console.log(`Product: ${product.name}, Price: $${product.basePrice}, Quantity: ${item.quantity}, Total: $${productTotal}`);
-
-                        // Accumulate the total price
-                        orderProductsTotal += productTotal;
-                    } else {
-                        console.error(`Product not found for id: ${item.product}`);
-                    }
-                } else {
-                    console.error(`Invalid product id: ${item.product}`);
-                }
-            } catch (err) {
-                console.error(`Error retrieving product with id ${item.product}:`, err);
-            }
-        }));
-
-        console.log(`Total price of all items: $${orderProductsTotal}`);
-
-    } catch (error) {
-        console.error("Error retrieving products prices:", error);
-        throw new Error("Internal server error");
-    }
-
-    totalPrice = orderProductsTotal + orderToppingTotal;
-    console.log("Total price including item and topping is: $", totalPrice);
-    return totalPrice;
-}
-
 /**
- * Create a new order
+ * Create a new order.
+ * Validates required fields and handles errors with descriptive messages.
  */
-async function createOrder(userId, items, specialInstructions = "") {
+async function createOrder(
+    userId,
+    items,
+    totalPrice,
+    specialInstructions = ""
+) {
     try {
-        total = await totalPrice(items);
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return {
+                error: true,
+                status: 400,
+                message: "Order must contain at least one item",
+                code: "MISSING_ITEMS",
+            };
+        }
 
+        // Check if totalPrice is provided and is a valid number
+        if (totalPrice === undefined || totalPrice === null) {
+            return {
+                error: true,
+                status: 400,
+                message: "Total price is required",
+                code: "MISSING_TOTAL_PRICE",
+            };
+        }
+
+        // If totalPrice is an object with a totalPrice property, extract it
+        const finalPrice =
+            typeof totalPrice === "object" && totalPrice.totalPrice !== undefined
+                ? totalPrice.totalPrice
+                : totalPrice;
+
+        // Validate that finalPrice is a number and is positive
+        if (isNaN(finalPrice) || finalPrice <= 0) {
+            return {
+                error: true,
+                status: 400,
+                message: "Total price must be a positive number",
+                code: "INVALID_TOTAL_PRICE",
+            };
+        }
+
+        // Create and save the new order
         const newOrder = new Order({
             user: userId,
             items,
-            totalPrice: total,
-            specialInstructions
+            totalPrice: finalPrice,
+            status: "processing",  // Set the status to "processing" when creating the order
+            specialInstructions: specialInstructions || "",
         });
 
         await newOrder.save();
 
-        // Add order to `orderHistory` in User model
-        await User.findByIdAndUpdate(
-            userId,
-            { $push: { orderHistory: newOrder._id } }, // Push order ID to history
-            { new: true }
-        );
+        // Add order ID to user's order history
+        if (userId) {
+            await User.findByIdAndUpdate(
+                userId,
+                { $push: { orderHistory: newOrder._id } },
+                { new: true }
+            );
+        }
 
-        return newOrder;
+        return {
+            error: false,
+            order: newOrder,
+            message: "Order created successfully",
+        };
     } catch (error) {
         console.error("Error creating order:", error);
-        throw new Error("Internal server error");
+
+        // Handle validation errors with descriptive messages
+        if (error.name === "ValidationError") {
+            const validationErrors = {};
+
+            // Extract validation error details
+            for (const field in error.errors) {
+                validationErrors[field] = error.errors[field].message;
+            }
+
+            return {
+                error: true,
+                status: 400,
+                message: "Order validation failed",
+                details: validationErrors,
+                code: "VALIDATION_ERROR",
+            };
+        }
+
+        // Handle other types of errors
+        return {
+            error: true,
+            status: 500,
+            message: "Failed to create order: " + (error.message || "Unknown error"),
+            code: "ORDER_CREATION_FAILED",
+        };
     }
 }
-
 
 /**
  * Get order by ID (with populated fields)
@@ -168,9 +141,7 @@ async function getAllOrders() {
  */
 
 async function updateOrderStatus(orderId, newStatus) {
-
     try {
-
         const updatedOrder = await Order.findOneAndUpdate(
             { _id: orderId },
             { orderStatus: newStatus },
@@ -189,25 +160,9 @@ async function updateOrderStatus(orderId, newStatus) {
     }
 }
 
-
-/**
- * Delete an order
- */
-async function deleteOrder(orderId) {
-    try {
-        const deletedOrder = await Order.findByIdAndDelete(orderId);
-        if (!deletedOrder) throw new Error("Order not found or already deleted");
-        return deletedOrder;
-    } catch (error) {
-        console.error("Error deleting order:", error);
-        throw new Error("Failed to delete order");
-    }
-}
-
 module.exports = {
     createOrder,
     getOrderById,
     getAllOrders,
     updateOrderStatus,
-    deleteOrder,
 };

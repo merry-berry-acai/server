@@ -1,17 +1,40 @@
-require('dotenv').config();
-
-// Server is configured in this file
+require("dotenv").config();
+const Logger = require("./utils/logger");
 const { app } = require("./server.js");
-const { dbConnect } = require('./utils/database.js');
+const { dbConnect } = require("./utils/database.js");
 
-
-//get the port
+// Get the port
 const PORT = process.env.PORT || 5000;
 
-// listen to the port
-app.listen(PORT, async ()=> {
-    console.log(`server is listening to PORT: ${PORT}`);
+// Create HTTP server
+const server = app.listen(PORT, async () => {
+    Logger.info(`Server is listening on port ${PORT}`, {
+        env: process.env.NODE_ENV || "development",
+        port: PORT,
+    });
 
-    // connect to the database
-    await dbConnect();
-})
+    try {
+        // Connect to the database
+        await dbConnect();
+        Logger.success("Database connection established");
+    } catch (error) {
+        Logger.error(`Database connection failed`, error, {
+            service: "database",
+        });
+        process.exit(1);
+    }
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+    Logger.error(`Unhandled Rejection`, err);
+    // Close server & exit process
+    server.close(() => process.exit(1));
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+    Logger.error(`Uncaught Exception`, err);
+    // Close server & exit process
+    server.close(() => process.exit(1));
+});

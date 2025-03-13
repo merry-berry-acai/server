@@ -1,81 +1,98 @@
-const { Category } = require("../models/CategoryModel");
 const { Item } = require("../models/MenuItemModel");
+const { Category } = require("../models/CategoryModel");
+const { Topping } = require("../models/ToppingModel");
 
-// Category validation
-async function validateCategoryAndGetId(categoryName) {
-    try {
-        if (!categoryName) {
-            return { error: "Category name is required." };
-        }
-
-        const category = await Category.findOne({ name: categoryName });
-
-        if (!category) {
-            console.error(`Category '${categoryName}' not found`);
-
-            // Retrieve all available categories
-            const availableCategories = await Category.find({}, "name").lean();
-            const categoryList = availableCategories.map(cat => cat.name).join(", ");
-
-            return {
-                error: `Category '${categoryName}' not found.`,
-                availableCategories: categoryList || "No categories available"
-            };
-        }
-
-        return category._id;
-    } catch (error) {
-        console.error("Error in validateCategoryAndGetId:", error.message);
-        return { error: "Internal server error: " + error.message };
-    }
-}
-
-
-
-async function createMenuItem(name, description, basePrice, category, imageUrl = "", toppings = []) {
-
+async function createMenuItem(
+    name,
+    description,
+    basePrice,
+    category,
+    toppings = [],
+    imageUrl
+) {
     try {
 
-        // Validate category
-        const categoryResult = await validateCategoryAndGetId(category);
-
-        // Check if category is not found
-        if (categoryResult.error) {
-            console.error("Error in createMenuItem:", categoryResult.error);
-            return {
-                error: categoryResult.error,
-                availableCategories: categoryResult.availableCategories // Return available categories
-            };
-        }
-
-        // Validate toppings (convert to ObjectIds)
-        const toppingIds = toppings.map(toppingId => String(toppingId));
 
         const newMenuItem = new Item({
             name,
             description,
             basePrice,
-            category: categoryResult,
+            category: category,
+            toppings: toppings,
             imageUrl,
-            toppings: toppingIds
         });
 
         await newMenuItem.save();
         return newMenuItem;
     } catch (error) {
+        // Handle mongoose validation errors
+        if (error.name === "ValidationError") {
+            const validationError = new Error(
+                `Validation error: ${Object.values(error.errors)
+                    .map((err) => err.message)
+                    .join(", ")}`
+            );
+            validationError.statusCode = 400;
+            throw validationError;
+        }
+
+        // Handle duplicate key error
+        if (error.code === 11000) {
+            const duplicateError = new Error(
+                `Menu item with this ${Object.keys(error.keyValue)[0]} already exists`
+            );
+            duplicateError.statusCode = 409;
+            throw duplicateError;
+        }
+
         console.error("Error creating menu item:", error);
-        throw new Error("Failed to create menu item");
+
+        // Preserve existing status code if available
+        if (!error.statusCode) {
+            error.statusCode = 500;
+            error.message =
+                error.message || "Internal server error while creating menu item";
+        }
+
+        throw error;
     }
 }
 
 async function getMenuItemById(menuItemId) {
     try {
+        if (!menuItemId) {
+            const error = new Error("Menu item ID is required");
+            error.statusCode = 400;
+            throw error;
+        }
+
         const menuItem = await Item.findById(menuItemId);
-        if (!menuItem) throw new Error("Menu item not found");
+
+        if (!menuItem) {
+            const error = new Error(`Menu item with ID ${menuItemId} not found`);
+            error.statusCode = 404;
+            throw error;
+        }
+
         return menuItem;
     } catch (error) {
         console.error("Error fetching menu item:", error);
-        throw new Error("Failed to fetch menu item");
+
+        // Handle invalid ObjectId format
+        if (error.name === "CastError") {
+            const castError = new Error(`Invalid menu item ID format: ${menuItemId}`);
+            castError.statusCode = 400;
+            throw castError;
+        }
+
+        // Preserve existing status code if available
+        if (!error.statusCode) {
+            error.statusCode = 500;
+            error.message =
+                error.message || "Internal server error while fetching menu item";
+        }
+
+        throw error;
     }
 }
 
@@ -84,69 +101,141 @@ async function getAllMenuItems(limit = null) {
         let query = Item.find();
 
         if (limit) {
+            // Validate limit is a positive number
+            if (isNaN(limit) || limit <= 0) {
+                const error = new Error("Limit must be a positive number");
+                error.statusCode = 400;
+                throw error;
+            }
+
             query = query.limit(limit);
         }
 
-        return await query;
+        const items = await query;
+
+        return items;
     } catch (error) {
         console.error("Error fetching menu items:", error);
-        throw new Error("Failed to fetch menu items");
+
+        // Preserve existing status code if available
+        if (!error.statusCode) {
+            error.statusCode = 500;
+            error.message =
+                error.message || "Internal server error while fetching menu items";
+        }
+
+        throw error;
     }
 }
 
-
 async function updateMenuItem(menuItemId, updateData) {
     try {
-        // Validate and replace category name with ObjectId if necessary
-        if (updateData.category) {
-            updateData.category = await validateCategoryAndGetId(updateData.category);
+        if (!menuItemId) {
+            const error = new Error("Menu item ID is required");
+            error.statusCode = 400;
+            throw error;
         }
 
-        const updatedMenuItem = await Item.findByIdAndUpdate(menuItemId, updateData, { new: true });
+        if (!updateData || Object.keys(updateData).length === 0) {
+            const error = new Error("No update data provided");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const updatedMenuItem = await Item.findByIdAndUpdate(
+            menuItemId,
+            updateData,
+            {
+                new: true,
+                runValidators: true, // Ensure validation runs on update
+            }
+        );
 
         if (!updatedMenuItem) {
-            return { error: "Menu item not found or update failed" };
+            const error = new Error(`Menu item with ID ${menuItemId} not found`);
+            error.statusCode = 404;
+            throw error;
         }
 
         return updatedMenuItem;
     } catch (error) {
-        console.error("Error updating menu item:", error.message);
-        return { error: error.message };
-    }
-}
+        console.error("Error updating menu item:", error);
 
-
-async function getItemsByCategory(categoryName) {
-    try {
-        // Validate category and get the category ID
-        const categoryId = await validateCategoryAndGetId(categoryName);
-
-        // If an error is returned from validation, return it directly
-        if (categoryId.error) {
-            return categoryId;
+        // Handle mongoose validation errors
+        if (error.name === "ValidationError") {
+            const validationError = new Error(
+                `Validation error: ${Object.values(error.errors)
+                    .map((err) => err.message)
+                    .join(", ")}`
+            );
+            validationError.statusCode = 400;
+            throw validationError;
         }
 
-        // Retrieve items that belong to the given category
-        const items = await Item.find({ category: categoryId }).populate("toppings");
+        // Handle invalid ObjectId format
+        if (error.name === "CastError") {
+            const castError = new Error(`Invalid menu item ID format: ${menuItemId}`);
+            castError.statusCode = 400;
+            throw castError;
+        }
 
-        return items.length > 0 ? items : { message: `No items found for category '${categoryName}'.` };
+        // Handle duplicate key error
+        if (error.code === 11000) {
+            const duplicateError = new Error(
+                `Update would create a duplicate ${Object.keys(error.keyValue)[0]}`
+            );
+            duplicateError.statusCode = 409;
+            throw duplicateError;
+        }
 
-    } catch (error) {
-        console.error("Error retrieving items by category:", error.message);
-        return { error: "Internal server error: " + error.message };
+        // Preserve existing status code if available
+        if (!error.statusCode) {
+            error.statusCode = 500;
+            error.message =
+                error.message || "Internal server error while updating menu item";
+        }
+
+        throw error;
     }
 }
-
-
 
 async function deleteMenuItem(menuItemId) {
     try {
+        if (!menuItemId) {
+            const error = new Error("Menu item ID is required");
+            error.statusCode = 400;
+            throw error;
+        }
+
         const deletedMenuItem = await Item.findByIdAndDelete(menuItemId);
-        if (!deletedMenuItem) throw new Error("Menu item not found or already deleted");
+
+        if (!deletedMenuItem) {
+            const error = new Error(
+                `Menu item with ID ${menuItemId} not found or already deleted`
+            );
+            error.statusCode = 404;
+            throw error;
+        }
+
         return deletedMenuItem;
     } catch (error) {
         console.error("Error deleting menu item:", error);
-        throw new Error("Failed to delete menu item");
+
+        // Handle invalid ObjectId format
+        if (error.name === "CastError") {
+            const castError = new Error(`Invalid menu item ID format: ${menuItemId}`);
+            castError.statusCode = 400;
+            throw castError;
+        }
+
+        // Preserve existing status code if available
+        if (!error.statusCode) {
+            error.statusCode = 500;
+            error.message =
+                error.message || "Internal server error while deleting menu item";
+        }
+
+        throw error;
     }
 }
 
@@ -156,5 +245,4 @@ module.exports = {
     getAllMenuItems,
     updateMenuItem,
     deleteMenuItem,
-    getItemsByCategory
 };

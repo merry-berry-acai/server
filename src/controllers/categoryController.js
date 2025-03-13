@@ -8,7 +8,10 @@ async function createCategory(name) {
         // Check if the category already exists
         const existingCategory = await Category.findOne({ name });
         if (existingCategory) {
-            throw new Error(`Category "${name}" already exists`);
+            return {
+                status: 400,
+                error: `Category '${name}' already exists`
+            };
         }
 
         const newCategory = new Category({ name });

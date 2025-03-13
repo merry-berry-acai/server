@@ -1,44 +1,61 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const ORDER_STATUSES = [
-    "Pending",
-    "Processing",
-    "Delivered",
-    "Cancelled",
-];
+const OrderItemSchema = new Schema({
+    product: {
+        type: Schema.Types.ObjectId,
+        ref: "MenuItem",
+        required: true,
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+        default: 1,
+    },
+    toppings: [
+        {
+            product: {
+                type: Schema.Types.ObjectId,
+                ref: "Topping",
+                required: false,
+            },
+            quantity: {
+                type: Number,
+                default: 1,
+                min: 1,
+            },
+        },
+    ]
+});
 
-const orderSchema = new mongoose.Schema(
+const OrderSchema = new Schema(
     {
         user: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "User",
-            required: true
+            required: false,
         },
-        items: [
-            {
-                product: { type: mongoose.Schema.Types.ObjectId, ref: "MenuItem", required: true },
-                quantity: { type: Number, required: true, min: 1 },
-                toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Topping", default: [] }],
-            },
-        ],
+        items: [OrderItemSchema],
         totalPrice: {
             type: Number,
-            required: true
+            required: true,
+        },
+        status: {
+            type: String,
+            enum: ["pending", "processing", "paid", "cancelled"],
+            default: "pending",
         },
         specialInstructions: {
             type: String,
-            default: ""
-        },
-        orderStatus: {
-            type: String,
-            enum: ORDER_STATUSES, // Ensure only valid statuses are stored
-            default: "Pending", // Default status when order is created
-            required: false
-        },
+            default: "",
+            trim: true,
+        }
     },
-    { timestamps: true }
+
+    {
+        timestamps: true, // Add createdAt and updatedAt fields
+    }
 );
 
-const Order = mongoose.model("Order", orderSchema);
-
-module.exports = { Order };
+module.exports = mongoose.model("Order", OrderSchema);
