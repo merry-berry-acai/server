@@ -114,9 +114,9 @@ router.patch(
 );
 
 /**
- * Delete a user by Firebase UID
+ * Delete a user by Database ID
  */
-//Only authenticated user can delete their own account
+
 router.delete(
     "/:id",
     checkUserFirebaseUid,

@@ -9,8 +9,7 @@ const PaymentSchema = new mongoose.Schema({
     },
     paymentIntentId: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     amount: {
         type: Number,
