@@ -19,7 +19,7 @@ app.use(requestLogger);
 app.use(
     cors({
         origin: "*", // Allow all origins; adjust as needed for production
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     })
 );
 
