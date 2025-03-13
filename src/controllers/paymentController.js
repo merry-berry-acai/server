@@ -1,5 +1,6 @@
 const Order = require("../models/OrderModel");
 const { Payment } = require("../models/PaymentModel");
+const Logger = require("../utils/logger");
 
 async function storeSuccessfulPayment(paymentIntent, orderId) {
     try {
