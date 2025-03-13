@@ -10,6 +10,12 @@ async function storeSuccessfulPayment(paymentIntent, orderId) {
 
         console.log("Storing Payment Intent:", paymentIntent);
 
+        // Check if payment already exists
+        const existingPayment = await Payment.findOne({ paymentIntentId: paymentIntent.id });
+        if (existingPayment) {
+            console.warn("Payment intent already exists, skipping insert.");
+            return { status: 409, message: "Duplicate payment detected" };
+        }
 
 
         // Extract relevant fields from paymentIntent
