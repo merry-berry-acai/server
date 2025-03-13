@@ -9,7 +9,7 @@ Sentry.init({
     dsn: "https://2be293c706cb92cbb9e6484727c4b2a9@o4508947030867968.ingest.de.sentry.io/4508948514406480",
 });
 
-console.log("Sentry initialized."); // Add this line
+console.log("Sentry initialized.");
 
 Sentry.setupExpressErrorHandler(app);
 
@@ -18,7 +18,7 @@ app.use(requestLogger);
 
 app.use(
     cors({
-        origin: "*", // Allow all origins; adjust as needed for production
+        origin: "*", // Allow all origins;
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     })
 );

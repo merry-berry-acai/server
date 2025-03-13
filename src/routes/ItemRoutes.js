@@ -68,8 +68,8 @@ router.get("/home/featured",
 router.patch("/:id",
     validateCategory,
     validateToppings,
-    checkUserFirebaseUid,
-    checkAdminRole,
+    //checkUserFirebaseUid,
+    //checkAdminRole,
     asyncHandler(async (req, res, next) => {
         try {
             const { id } = req.params;

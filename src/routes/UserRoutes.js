@@ -120,10 +120,11 @@ router.patch(
 router.delete(
     "/:id",
     checkUserFirebaseUid,
+    checkAdminRole,
     asyncHandler(async (req, res) => {
-        const deletedUser = await deleteUserByUid(req.firebaseUid);
+        const deletedUser = await deleteUser(req.params.id);
         sendSuccess(res, {
-            message: `User with UID '${req.firebaseUid}' successfully deleted.`,
+            message: `User with UID '${req.params.id}' successfully deleted.`,
         });
     })
 );
