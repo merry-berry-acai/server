@@ -103,7 +103,7 @@ router.get(
 /**
  * Update a user by Firebase UID
  */
-router.patch(
+router.put(
     "/",
     checkUserFirebaseUid,
     checkDuplicateUser,

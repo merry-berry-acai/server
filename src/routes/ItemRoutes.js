@@ -65,7 +65,7 @@ router.get("/home/featured",
 
 
 // Update a menu item by ID
-router.patch("/:id",
+router.put("/:id",
     validateCategory,
     validateToppings,
     checkUserFirebaseUid,
